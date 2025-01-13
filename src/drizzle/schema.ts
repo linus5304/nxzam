@@ -5,7 +5,7 @@ export const difficultyLevel = pgEnum("difficulty_level", ['easy', 'medium', 'ha
 export const examType = pgEnum("exam_type", ['gce_ol', 'gce_al'])
 export const practiceType = pgEnum("practice_type", ['self_study', 'guided', 'challenge'])
 export const questionStatus = pgEnum("question_status", ['draft', 'review', 'published', 'archived'])
-export const userRole = pgEnum("user_role", ['student', 'teacher', 'admin'])
+export const userRole = pgEnum("user_role", ['org:student', 'org:teacher', 'org:admin'])
 
 
 export const SubjectTable = pgTable("subjects", {
@@ -25,7 +25,7 @@ export const UserTable = pgTable("users", {
 	email: varchar({ length: 255 }).notNull(),
 	fullName: varchar("full_name", { length: 255 }).notNull(),
 	passwordHash: varchar("password_hash", { length: 255 }).notNull(),
-	role: userRole().default('student').notNull(),
+	role: userRole().default('org:student').notNull(),
 	profileImageUrl: text("profile_image_url"),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),

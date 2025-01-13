@@ -11,9 +11,9 @@ import {
 } from "lucide-react"
 import * as React from "react"
 
-import { NavMain } from "@/app/(admin)/_components/sidebar/nav-main"
-import { NavSecondary } from "@/app/(admin)/_components/sidebar/nav-secondary"
-import { NavUser } from "@/app/(admin)/_components/sidebar/nav-user"
+import { NavMain } from "@/app/(authenticated)/_components/sidebar/nav-main"
+import { NavSecondary } from "@/app/(authenticated)/_components/sidebar/nav-secondary"
+import { NavUser } from "@/app/(authenticated)/_components/sidebar/nav-user"
 import {
   Sidebar,
   SidebarContent,
@@ -89,7 +89,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <a href="#">
-                <Icons.LogoDark size={140}/>
+                <Icons.LogoDark size={140} />
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>

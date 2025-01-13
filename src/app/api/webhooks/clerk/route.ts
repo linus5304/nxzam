@@ -1,4 +1,5 @@
 import { env } from "@/data/env/server";
+import { createUser } from "@/server/actions/users";
 import { WebhookEvent } from "@clerk/nextjs/server";
 import { headers } from "next/headers";
 import { Webhook } from "svix";
@@ -14,6 +15,8 @@ export async function POST(req: Request) {
         return new Response('Missing svix headers', { status: 400 })
     }
 
+    console.log("Webhook received", svixId, svixTimestamp, svixSignature)
+
     const payload = await req.json()
     const body = JSON.stringify(payload)
 
@@ -22,9 +25,9 @@ export async function POST(req: Request) {
 
     try {
         event = wh.verify(body, {
-            id: svixId,
-            timestamp: svixTimestamp,
-            signature: svixSignature,
+            "svix-id": svixId,
+            "svix-timestamp": svixTimestamp,
+            "svix-signature": svixSignature,
         }) as WebhookEvent
     } catch (error) {
         console.error("Error verifying webhook", error)
@@ -34,7 +37,15 @@ export async function POST(req: Request) {
     switch (event.type) {
         case 'user.created':
             console.log('User created', event.data)
-            break
+            const user = await createUser({
+                id: event.data.id,
+                email: event.data.email_addresses[0].email_address,
+                fullName: event.data.first_name + " " + event.data.last_name,
+                role: event.data.organization_memberships?.[0]?.role as 'org:student' | 'org:teacher' | 'org:admin' ?? 'org:student',
+                profileImageUrl: event.data.image_url,
+            })
+
+            console.log("User created", user)
     }
 
     return new Response('Webhook received', { status: 200 })
