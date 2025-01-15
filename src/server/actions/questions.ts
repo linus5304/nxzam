@@ -1,27 +1,29 @@
 'use server'
 
-import { questionFormSchema } from '@/schemas/questions'
+import { QuestionFormData, questionFormSchema } from '@/schemas/questions'
 import { currentUser } from '@clerk/nextjs/server'
-import { createQuestionDB, getQuestionDB, updateQuestionDB } from '@/server/db/questions'
-
+import { createQuestionDB, getQuestionDB } from '@/server/db/questions'
 
 export async function createQuestion(prevState: any, formData: FormData) {
-  const validatedFields = questionFormSchema.safeParse({
-    subjectId: formData.get('subjectId'),
-    questionText: formData.get('questionText'),
-    explanation: formData.get('explanation'),
-    options: formData.getAll('options'),
+  const rawData: QuestionFormData = {
+    subjectId: formData.get('subjectId') as string,
+    questionText: formData.get('questionText') as string,
+    explanation: formData.get('explanation') as string,
+    options: formData.getAll('options') as string[],
     correctAnswer: parseInt(formData.get('correctAnswer') as string, 10),
-    difficulty: formData.get('difficulty'),
-    status: formData.get('status'),
-    tags: formData.getAll('tags'),
-    metadata: JSON.parse(formData.get('metadata') as string || '{}'),
-  })
+    difficulty: formData.get('difficulty') as 'easy' | 'medium' | 'hard',
+    status: formData.get('status') as 'draft' | 'published' | 'archived',
+    tags: formData.getAll('tags') as string[],
+    metadata: formData.get('metadata') ? JSON.parse(formData.get('metadata') as string) : {},
+  }
+  const validatedFields = questionFormSchema.safeParse(rawData)
 
   if (!validatedFields.success) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
       message: 'Failed to create question.',
+      success: false,
+      inputs: rawData,
     }
   }
 
@@ -42,17 +44,17 @@ export async function createQuestion(prevState: any, formData: FormData) {
       createdBy: user.id,
       questionText,
       explanation,
-      options: JSON.stringify(options),
+      options,
       correctAnswer,
       difficulty,
       status,
       tags,
       metadata,
     })
-    return { message: 'Question created successfully!' }
+    return { message: 'Question created successfully!', success: true }
   } catch (error) {
     console.error(error)
-    return { message: 'Database Error: Failed to create question.' }
+    return { message: 'Database Error: Failed to create question.', success: false }
   }
 }
 

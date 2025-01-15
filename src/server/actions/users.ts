@@ -12,6 +12,7 @@ export async function createUser(data: User) {
     }
 
     const user = await createUserDB({
+        id: userData.id,
         email: userData.email,
         fullName: userData.fullName,
         passwordHash: "",

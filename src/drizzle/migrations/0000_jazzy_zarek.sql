@@ -2,11 +2,11 @@ CREATE TYPE "public"."difficulty_level" AS ENUM('easy', 'medium', 'hard');--> st
 CREATE TYPE "public"."exam_type" AS ENUM('gce_ol', 'gce_al');--> statement-breakpoint
 CREATE TYPE "public"."practice_type" AS ENUM('self_study', 'guided', 'challenge');--> statement-breakpoint
 CREATE TYPE "public"."question_status" AS ENUM('draft', 'review', 'published', 'archived');--> statement-breakpoint
-CREATE TYPE "public"."user_role" AS ENUM('student', 'teacher', 'admin');--> statement-breakpoint
+CREATE TYPE "public"."user_role" AS ENUM('org:student', 'org:teacher', 'org:admin');--> statement-breakpoint
 CREATE TABLE "exam_attempts" (
-	"id" uuid PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"exam_id" uuid NOT NULL,
-	"user_id" uuid NOT NULL,
+	"user_id" text NOT NULL,
 	"started_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"completed_at" timestamp with time zone,
 	"score" integer,
@@ -29,11 +29,11 @@ CREATE TABLE "exam_questions" (
 );
 --> statement-breakpoint
 CREATE TABLE "exams" (
-	"id" uuid PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"title" varchar(255) NOT NULL,
 	"description" text,
 	"subject_id" uuid NOT NULL,
-	"created_by" uuid NOT NULL,
+	"created_by" text NOT NULL,
 	"duration_minutes" integer NOT NULL,
 	"passing_score" integer NOT NULL,
 	"is_published" boolean DEFAULT false NOT NULL,
@@ -44,7 +44,7 @@ CREATE TABLE "exams" (
 );
 --> statement-breakpoint
 CREATE TABLE "learning_progress" (
-	"user_id" uuid NOT NULL,
+	"user_id" text NOT NULL,
 	"subject_id" uuid NOT NULL,
 	"topic" text NOT NULL,
 	"mastery_level" integer DEFAULT 0 NOT NULL,
@@ -59,9 +59,9 @@ CREATE TABLE "learning_progress" (
 );
 --> statement-breakpoint
 CREATE TABLE "practice_attempts" (
-	"id" uuid PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"practice_set_id" uuid NOT NULL,
-	"user_id" uuid NOT NULL,
+	"user_id" text NOT NULL,
 	"started_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"completed_at" timestamp with time zone,
 	"score" integer,
@@ -83,12 +83,12 @@ CREATE TABLE "practice_questions" (
 );
 --> statement-breakpoint
 CREATE TABLE "practice_sets" (
-	"id" uuid PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"title" varchar(255) NOT NULL,
 	"description" text,
 	"practice_type" "practice_type" DEFAULT 'self_study' NOT NULL,
 	"subject_id" uuid NOT NULL,
-	"created_by" uuid NOT NULL,
+	"created_by" text NOT NULL,
 	"topics" text[] DEFAULT '{""}' NOT NULL,
 	"duration_minutes" integer,
 	"is_public" boolean DEFAULT false NOT NULL,
@@ -99,9 +99,9 @@ CREATE TABLE "practice_sets" (
 );
 --> statement-breakpoint
 CREATE TABLE "question_reviews" (
-	"id" uuid PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"question_id" uuid NOT NULL,
-	"reviewed_by" uuid NOT NULL,
+	"reviewed_by" text NOT NULL,
 	"status" varchar(20) NOT NULL,
 	"feedback" text,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -109,9 +109,9 @@ CREATE TABLE "question_reviews" (
 );
 --> statement-breakpoint
 CREATE TABLE "questions" (
-	"id" uuid PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"subject_id" uuid NOT NULL,
-	"created_by" uuid NOT NULL,
+	"created_by" text NOT NULL,
 	"question_text" text NOT NULL,
 	"explanation" text,
 	"options" jsonb NOT NULL,
@@ -126,7 +126,7 @@ CREATE TABLE "questions" (
 );
 --> statement-breakpoint
 CREATE TABLE "subjects" (
-	"id" uuid PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" varchar(100) NOT NULL,
 	"code" varchar(20) NOT NULL,
 	"exam_type" "exam_type" NOT NULL,
@@ -137,11 +137,11 @@ CREATE TABLE "subjects" (
 );
 --> statement-breakpoint
 CREATE TABLE "users" (
-	"id" uuid PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
+	"id" text PRIMARY KEY NOT NULL,
 	"email" varchar(255) NOT NULL,
 	"full_name" varchar(255) NOT NULL,
 	"password_hash" varchar(255) NOT NULL,
-	"role" "user_role" DEFAULT 'student' NOT NULL,
+	"role" "user_role" DEFAULT 'org:student' NOT NULL,
 	"profile_image_url" text,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -167,12 +167,12 @@ ALTER TABLE "question_reviews" ADD CONSTRAINT "question_reviews_reviewed_by_fkey
 ALTER TABLE "questions" ADD CONSTRAINT "questions_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "questions" ADD CONSTRAINT "questions_subject_id_fkey" FOREIGN KEY ("subject_id") REFERENCES "public"."subjects"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "idx_exam_attempts_exam" ON "exam_attempts" USING btree ("exam_id" uuid_ops);--> statement-breakpoint
-CREATE INDEX "idx_exam_attempts_user" ON "exam_attempts" USING btree ("user_id" uuid_ops);--> statement-breakpoint
-CREATE INDEX "idx_exams_created_by" ON "exams" USING btree ("created_by" uuid_ops);--> statement-breakpoint
+CREATE INDEX "idx_exam_attempts_user" ON "exam_attempts" USING btree ("user_id" text_ops);--> statement-breakpoint
+CREATE INDEX "idx_exams_created_by" ON "exams" USING btree ("created_by" text_ops);--> statement-breakpoint
 CREATE INDEX "idx_exams_subject" ON "exams" USING btree ("subject_id" uuid_ops);--> statement-breakpoint
 CREATE INDEX "idx_learning_progress_mastery" ON "learning_progress" USING btree ("mastery_level" int4_ops);--> statement-breakpoint
-CREATE INDEX "idx_learning_progress_user" ON "learning_progress" USING btree ("user_id" uuid_ops);--> statement-breakpoint
-CREATE INDEX "idx_questions_created_by" ON "questions" USING btree ("created_by" uuid_ops);--> statement-breakpoint
+CREATE INDEX "idx_learning_progress_user" ON "learning_progress" USING btree ("user_id" text_ops);--> statement-breakpoint
+CREATE INDEX "idx_questions_created_by" ON "questions" USING btree ("created_by" text_ops);--> statement-breakpoint
 CREATE INDEX "idx_questions_difficulty" ON "questions" USING btree ("difficulty" enum_ops);--> statement-breakpoint
 CREATE INDEX "idx_questions_status" ON "questions" USING btree ("status" enum_ops);--> statement-breakpoint
 CREATE INDEX "idx_questions_subject" ON "questions" USING btree ("subject_id" uuid_ops);

@@ -3,40 +3,60 @@
 import { QuestionFormData } from '@/schemas/questions'
 import { createQuestion } from '@/server/actions/questions'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { useActionState, useState } from 'react'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 
 interface QuestionFormProps {
     subjects: { id: string, name: string, examType: "gce_ol" | "gce_al" }[]
+}
+
+const initialState: QuestionFormData = {
+    subjectId: '',
+    questionText: '',
+    explanation: '',
+    options: ['', ''],
+    correctAnswer: 0,
+    difficulty: 'medium',
+    status: 'draft',
+    tags: [''],
+    metadata: {},
 }
 
 export function QuestionForm({ subjects }: QuestionFormProps) {
     const [state, formAction, pending] = useActionState(createQuestion, {
         errors: {} as Partial<Record<keyof QuestionFormData, string[]>>,
         message: '',
+        success: false,
+        inputs: initialState,
     })
 
-    const [options, setOptions] = useState(['', ''])
-    const [tags, setTags] = useState([''])
+    const [formState, setFormState] = useState(initialState)
 
-    const addOption = () => setOptions([...options, ''])
-    const removeOption = (index: number) => setOptions(options.filter((_, i) => i !== index))
+    const addOption = () => {
+        const newOptions = [...(formState?.options ?? []), '']
+        setFormState({ ...formState, options: newOptions })
+    }
+    const removeOption = (index: number) => {
+        const newOptions = formState.options.filter((_, i) => i !== index)
+        setFormState({ ...formState, options: newOptions })
+    }
     const updateOption = (index: number, value: string) => {
-        const newOptions = [...options]
+        const newOptions = [...formState.options]
         newOptions[index] = value
-        setOptions(newOptions)
+        setFormState({ ...formState, options: newOptions })
     }
 
-    const addTag = () => setTags([...tags, ''])
-    const removeTag = (index: number) => setTags(tags.filter((_, i) => i !== index))
+    const addTag = () => setFormState({ ...formState, tags: [...formState.tags, ''] })
+    const removeTag = (index: number) => setFormState({ ...formState, tags: formState.tags.filter((_, i) => i !== index) })
     const updateTag = (index: number, value: string) => {
-        const newTags = [...tags]
+        const newTags = [...formState.tags]
         newTags[index] = value
-        setTags(newTags)
+        setFormState({ ...formState, tags: newTags })
     }
 
     return (
@@ -48,7 +68,7 @@ export function QuestionForm({ subjects }: QuestionFormProps) {
                 <CardContent className="space-y-4">
                     <div className="space-y-2">
                         <Label htmlFor="subjectId">Subject</Label>
-                        <Select name="subjectId" defaultValue="">
+                        <Select name="subjectId" defaultValue={state.inputs?.subjectId}>
                             <SelectTrigger>
                                 <SelectValue placeholder="Select a subject" />
                             </SelectTrigger>
@@ -67,7 +87,7 @@ export function QuestionForm({ subjects }: QuestionFormProps) {
 
                     <div className="space-y-2">
                         <Label htmlFor="questionText">Question Text</Label>
-                        <Textarea name="questionText" placeholder="Enter the question text" />
+                        <Textarea name="questionText" placeholder="Enter the question text" defaultValue={state.inputs?.questionText} />
                         {state.errors?.questionText && (
                             <p className="text-sm text-red-500">{state.errors.questionText}</p>
                         )}
@@ -75,16 +95,16 @@ export function QuestionForm({ subjects }: QuestionFormProps) {
 
                     <div className="space-y-2">
                         <Label htmlFor="explanation">Explanation (Optional)</Label>
-                        <Textarea name="explanation" placeholder="Enter an explanation for the correct answer" />
+                        <Textarea name="explanation" placeholder="Enter an explanation for the correct answer" defaultValue={state.inputs?.explanation} />
                     </div>
 
                     <div className="space-y-2">
                         <Label>Options</Label>
-                        {options.map((option, index) => (
+                        {formState.options.map((option, index) => (
                             <div key={index} className="flex items-center space-x-2">
                                 <Input
                                     name="options"
-                                    value={option}
+                                    defaultValue={state.inputs?.options ? state.inputs?.options[index] : ''}
                                     onChange={(e) => updateOption(index, e.target.value)}
                                     placeholder={`Option ${index + 1}`}
                                 />
@@ -101,12 +121,12 @@ export function QuestionForm({ subjects }: QuestionFormProps) {
 
                     <div className="space-y-2">
                         <Label htmlFor="correctAnswer">Correct Answer</Label>
-                        <Select name="correctAnswer" defaultValue="">
+                        <Select name="correctAnswer" defaultValue={state.inputs?.correctAnswer?.toString()}>
                             <SelectTrigger>
                                 <SelectValue placeholder="Select the correct answer" />
                             </SelectTrigger>
                             <SelectContent>
-                                {options.map((_, index) => (
+                                {formState.options.map((_, index) => (
                                     <SelectItem key={index} value={index.toString()}>Option {index + 1}</SelectItem>
                                 ))}
                             </SelectContent>
@@ -118,7 +138,7 @@ export function QuestionForm({ subjects }: QuestionFormProps) {
 
                     <div className="space-y-2">
                         <Label htmlFor="difficulty">Difficulty</Label>
-                        <Select name="difficulty" defaultValue="medium">
+                        <Select name="difficulty" defaultValue={state.inputs?.difficulty}>
                             <SelectTrigger>
                                 <SelectValue placeholder="Select difficulty" />
                             </SelectTrigger>
@@ -135,7 +155,7 @@ export function QuestionForm({ subjects }: QuestionFormProps) {
 
                     <div className="space-y-2">
                         <Label htmlFor="status">Status</Label>
-                        <Select name="status" defaultValue="draft">
+                        <Select name="status" defaultValue={state.inputs?.status}>
                             <SelectTrigger>
                                 <SelectValue placeholder="Select status" />
                             </SelectTrigger>
@@ -152,7 +172,7 @@ export function QuestionForm({ subjects }: QuestionFormProps) {
 
                     <div className="space-y-2">
                         <Label>Tags</Label>
-                        {tags.map((tag, index) => (
+                        {formState.tags.map((tag, index) => (
                             <div key={index} className="flex items-center space-x-2">
                                 <Input
                                     name="tags"
@@ -175,18 +195,16 @@ export function QuestionForm({ subjects }: QuestionFormProps) {
                             <p className="text-sm text-red-500">{state.errors.metadata}</p>
                         )}
                     </div>
-                </CardContent>
-                <CardFooter>
+                    {state.message && (
+                        <Alert variant={state.success ? "default" : "destructive"}>
+                            <AlertDescription>{state.message}</AlertDescription>
+                        </Alert>
+                    )}
                     <Button type="submit" disabled={pending}>
                         {pending ? 'Creating...' : 'Create Question'}
                     </Button>
-                </CardFooter>
+                </CardContent>
             </form>
-            {state.message && (
-                <p className={`mt-4 text-center ${state.errors ? 'text-red-500' : 'text-green-500'}`}>
-                    {state.message}
-                </p>
-            )}
         </Card>
     )
 }

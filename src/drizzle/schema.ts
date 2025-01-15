@@ -7,9 +7,10 @@ export const practiceType = pgEnum("practice_type", ['self_study', 'guided', 'ch
 export const questionStatus = pgEnum("question_status", ['draft', 'review', 'published', 'archived'])
 export const userRole = pgEnum("user_role", ['org:student', 'org:teacher', 'org:admin'])
 
+sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`
 
 export const SubjectTable = pgTable("subjects", {
-	id: uuid().default(sql`uuid_generate_v4()`).primaryKey().notNull(),
+	id: uuid("id").defaultRandom().primaryKey().notNull(),
 	name: varchar({ length: 100 }).notNull(),
 	code: varchar({ length: 20 }).notNull(),
 	examType: examType("exam_type").notNull(),
@@ -21,7 +22,7 @@ export const SubjectTable = pgTable("subjects", {
 ]);
 
 export const UserTable = pgTable("users", {
-	id: uuid().default(sql`uuid_generate_v4()`).primaryKey().notNull(),
+	id: text('id').primaryKey().notNull(),
 	email: varchar({ length: 255 }).notNull(),
 	fullName: varchar("full_name", { length: 255 }).notNull(),
 	passwordHash: varchar("password_hash", { length: 255 }).notNull(),
@@ -34,18 +35,18 @@ export const UserTable = pgTable("users", {
 ]);
 
 export const ExamTable = pgTable("exams", {
-	id: uuid().default(sql`uuid_generate_v4()`).primaryKey().notNull(),
+	id: uuid("id").defaultRandom().primaryKey().notNull(),
 	title: varchar({ length: 255 }).notNull(),
 	description: text(),
 	subjectId: uuid("subject_id").notNull(),
-	createdBy: uuid("created_by").notNull(),
+	createdBy: text("created_by").notNull(),
 	durationMinutes: integer("duration_minutes").notNull(),
 	passingScore: integer("passing_score").notNull(),
 	isPublished: boolean("is_published").default(false).notNull(),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 }, (table) => [
-	index("idx_exams_created_by").using("btree", table.createdBy.asc().nullsLast().op("uuid_ops")),
+	index("idx_exams_created_by").using("btree", table.createdBy.asc().nullsLast().op("text_ops")),
 	index("idx_exams_subject").using("btree", table.subjectId.asc().nullsLast().op("uuid_ops")),
 	foreignKey({
 			columns: [table.createdBy],
@@ -62,9 +63,9 @@ export const ExamTable = pgTable("exams", {
 ]);
 
 export const QuestionTable = pgTable("questions", {
-	id: uuid().default(sql`uuid_generate_v4()`).primaryKey().notNull(),
+	id: uuid("id").defaultRandom().primaryKey().notNull(),
 	subjectId: uuid("subject_id").notNull(),
-	createdBy: uuid("created_by").notNull(),
+	createdBy: text("created_by").notNull(),
 	questionText: text("question_text").notNull(),
 	explanation: text(),
 	options: jsonb().notNull(),
@@ -76,7 +77,7 @@ export const QuestionTable = pgTable("questions", {
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 }, (table) => [
-	index("idx_questions_created_by").using("btree", table.createdBy.asc().nullsLast().op("uuid_ops")),
+	index("idx_questions_created_by").using("btree", table.createdBy.asc().nullsLast().op("text_ops")),
 	index("idx_questions_difficulty").using("btree", table.difficulty.asc().nullsLast().op("enum_ops")),
 	index("idx_questions_status").using("btree", table.status.asc().nullsLast().op("enum_ops")),
 	index("idx_questions_subject").using("btree", table.subjectId.asc().nullsLast().op("uuid_ops")),
@@ -94,9 +95,9 @@ export const QuestionTable = pgTable("questions", {
 ]);
 
 export const ExamAttemptTable = pgTable("exam_attempts", {
-	id: uuid().default(sql`uuid_generate_v4()`).primaryKey().notNull(),
+	id: uuid("id").defaultRandom().primaryKey().notNull(),
 	examId: uuid("exam_id").notNull(),
-	userId: uuid("user_id").notNull(),
+	userId: text("user_id").notNull(),
 	startedAt: timestamp("started_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	completedAt: timestamp("completed_at", { withTimezone: true, mode: 'string' }),
 	score: integer(),
@@ -105,7 +106,7 @@ export const ExamAttemptTable = pgTable("exam_attempts", {
 	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 }, (table) => [
 	index("idx_exam_attempts_exam").using("btree", table.examId.asc().nullsLast().op("uuid_ops")),
-	index("idx_exam_attempts_user").using("btree", table.userId.asc().nullsLast().op("uuid_ops")),
+	index("idx_exam_attempts_user").using("btree", table.userId.asc().nullsLast().op("text_ops")),
 	foreignKey({
 			columns: [table.examId],
 			foreignColumns: [ExamTable.id],
@@ -121,12 +122,12 @@ export const ExamAttemptTable = pgTable("exam_attempts", {
 ]);
 
 export const PracticeSetTable = pgTable("practice_sets", {
-	id: uuid().default(sql`uuid_generate_v4()`).primaryKey().notNull(),
+	id: uuid("id").defaultRandom().primaryKey().notNull(),
 	title: varchar({ length: 255 }).notNull(),
 	description: text(),
 	practiceType: practiceType("practice_type").default('self_study').notNull(),
 	subjectId: uuid("subject_id").notNull(),
-	createdBy: uuid("created_by").notNull(),
+	createdBy: text("created_by").notNull(),
 	topics: text().array().default([""]).notNull(),
 	durationMinutes: integer("duration_minutes"),
 	isPublic: boolean("is_public").default(false).notNull(),
@@ -148,9 +149,9 @@ export const PracticeSetTable = pgTable("practice_sets", {
 ]);
 
 export const PracticeAttemptTable = pgTable("practice_attempts", {
-	id: uuid().default(sql`uuid_generate_v4()`).primaryKey().notNull(),
+	id: uuid("id").defaultRandom().primaryKey().notNull(),
 	practiceSetId: uuid("practice_set_id").notNull(),
-	userId: uuid("user_id").notNull(),
+	userId: text("user_id").notNull(),
 	startedAt: timestamp("started_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	completedAt: timestamp("completed_at", { withTimezone: true, mode: 'string' }),
 	score: integer(),
@@ -174,9 +175,9 @@ export const PracticeAttemptTable = pgTable("practice_attempts", {
 ]);
 
 export const QuestionReviewTable = pgTable("question_reviews", {
-	id: uuid().default(sql`uuid_generate_v4()`).primaryKey().notNull(),
+	id: uuid("id").defaultRandom().primaryKey().notNull(),
 	questionId: uuid("question_id").notNull(),
-	reviewedBy: uuid("reviewed_by").notNull(),
+	reviewedBy: text("reviewed_by").notNull(),
 	status: varchar({ length: 20 }).notNull(),
 	feedback: text(),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
@@ -237,7 +238,7 @@ export const ExamQuestionTable = pgTable("exam_questions", {
 ]);
 
 export const LearningProgressTable = pgTable("learning_progress", {
-	userId: uuid("user_id").notNull(),
+	userId: text("user_id").notNull(),
 	subjectId: uuid("subject_id").notNull(),
 	topic: text().notNull(),
 	masteryLevel: integer("mastery_level").default(0).notNull(),
@@ -248,7 +249,7 @@ export const LearningProgressTable = pgTable("learning_progress", {
 	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 }, (table) => [
 	index("idx_learning_progress_mastery").using("btree", table.masteryLevel.asc().nullsLast().op("int4_ops")),
-	index("idx_learning_progress_user").using("btree", table.userId.asc().nullsLast().op("uuid_ops")),
+	index("idx_learning_progress_user").using("btree", table.userId.asc().nullsLast().op("text_ops")),
 	foreignKey({
 			columns: [table.subjectId],
 			foreignColumns: [SubjectTable.id],
