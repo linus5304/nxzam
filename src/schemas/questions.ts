@@ -1,3 +1,5 @@
+import { parseQuestion } from '@/lib/parsers'
+import { Difficulty, Status } from '@/lib/types'
 import { z } from 'zod'
 
 export const questionFormSchema = z.object({
@@ -17,3 +19,12 @@ export const questionFormSchema = z.object({
 })
 
 export type QuestionFormData = z.infer<typeof questionFormSchema>
+
+export type QuestionType = ReturnType<typeof parseQuestion>
+
+export type QuestionsFilterParams = {
+  search?: string,
+  subjectId?: string,
+  difficulty?: Difficulty,
+  status?: Status
+}

@@ -1,8 +1,9 @@
 'use server'
 
-import { QuestionFormData, questionFormSchema } from '@/schemas/questions'
+import { QuestionFormData, questionFormSchema, QuestionsFilterParams, QuestionType } from '@/schemas/questions'
 import { currentUser } from '@clerk/nextjs/server'
-import { createQuestionDB, getQuestionDB } from '@/server/db/questions'
+import { createQuestionDB, deleteQuestionDB, getQuestionDB, getQuestionsDB, updateQuestionDB } from '@/server/db/questions'
+import { parseQuestion } from '@/lib/parsers'
 
 export async function createQuestion(prevState: any, formData: FormData) {
   const rawData: QuestionFormData = {
@@ -27,9 +28,9 @@ export async function createQuestion(prevState: any, formData: FormData) {
     }
   }
 
-  const { 
-    subjectId, questionText, explanation, options, correctAnswer, 
-    difficulty, status, tags, metadata 
+  const {
+    subjectId, questionText, explanation, options, correctAnswer,
+    difficulty, status, tags, metadata
   } = validatedFields.data
 
   const user = await currentUser()
@@ -60,5 +61,28 @@ export async function createQuestion(prevState: any, formData: FormData) {
 
 export async function getQuestion(id: string) {
   const question = await getQuestionDB(id)
+  return question
+}
+
+export async function getQuestions(filterParams: QuestionsFilterParams): Promise<QuestionType[]> {
+  const questions = await getQuestionsDB(filterParams)
+  return questions.map(parseQuestion)
+}
+
+export async function updateQuestion(id: string, data: QuestionFormData) {
+  const user = await currentUser()
+  if (!user) {
+    return { message: 'User not found.' }
+  }
+  const updateData = {
+    ...data,
+    createdBy: user.id,
+  }
+  const question = await updateQuestionDB(id, updateData)
+  return question
+}
+
+export async function deleteQuestion(id: string) {
+  const question = await deleteQuestionDB(id)
   return question
 }
