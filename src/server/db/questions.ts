@@ -25,8 +25,8 @@ export async function getQuestionDB(id: string) {
 export async function getQuestionsDB(filterParams: QuestionsFilterParams) {
     const questions = await db.query.QuestionTable.findMany({
         where: (question, { eq, ilike }) => {
-            if (filterParams.search) {
-                return ilike(question.questionText, `%${filterParams.search}%`)
+            if (filterParams.questionText) {
+                return ilike(question.questionText, `%${filterParams.questionText}%`)
             }
             if (filterParams.subjectId) {
                 return eq(question.subjectId, filterParams.subjectId)
