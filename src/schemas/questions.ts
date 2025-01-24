@@ -23,7 +23,7 @@ export type QuestionFormData = z.infer<typeof questionFormSchema>
 export type QuestionType = ReturnType<typeof parseQuestion>
 
 export type QuestionsFilterParams = {
-  search?: string,
+  questionText?: string,
   subjectId?: string,
   difficulty?: Difficulty,
   status?: Status
