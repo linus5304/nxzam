@@ -2,24 +2,29 @@ import { db } from "@/drizzle/db"
 import { QuestionTable, SubjectTable } from "@/drizzle/schema"
 import { Difficulty, Status } from "@/lib/types"
 import { QuestionsFilterParams } from "@/schemas/questions"
-import { eq } from "drizzle-orm"
+import { and, eq } from "drizzle-orm"
 
 
-export async function createQuestionDB(question: typeof QuestionTable.$inferInsert) {
-    try {
-        const data = await db.insert(QuestionTable).values(question)
-        return data
-    } catch (error) {
-        console.error(error)
-        throw error
-    }
+export async function createQuestionDB(data: typeof QuestionTable.$inferInsert) {
+    const [question] = await db
+        .insert(QuestionTable)
+        .values(data)
+        .returning({ id: QuestionTable.id, userId: QuestionTable.createdBy })
+    return question
 }
 
 export async function getQuestionDB(id: string) {
-    const data = await db.query.QuestionTable.findFirst({
-        where: (question, { eq }) => eq(question.id, id)
+    return await db.query.QuestionTable.findFirst({
+        where: eq(QuestionTable.id, id),
+        with: {
+            subject: {
+                columns: {
+                    id: true,
+                    name: true
+                }
+            }
+        }
     })
-    return data
 }
 
 export async function getQuestionsDB(filterParams: QuestionsFilterParams) {
@@ -52,13 +57,12 @@ export async function getQuestionsDB(filterParams: QuestionsFilterParams) {
     })[]
 }
 
-export async function updateQuestionDB(id: string, question: typeof QuestionTable.$inferInsert) {
-    const questionToUpdate = await getQuestionDB(id)
-    if (!questionToUpdate) {
-        return { error: "Question not found" }
-    }
-    const updatedQuestion = await db.update(QuestionTable).set(question).where(eq(QuestionTable.id, id))
-    return updatedQuestion
+export async function updateQuestionDB(question: typeof QuestionTable.$inferInsert, { id, userId }: { id: string, userId: string }) {
+    const { rowCount } = await db
+        .update(QuestionTable)
+        .set(question)
+        .where(and(eq(QuestionTable.id, id), eq(QuestionTable.createdBy, userId)));
+    return rowCount > 0
 }
 
 export async function deleteQuestionDB(id: string) {

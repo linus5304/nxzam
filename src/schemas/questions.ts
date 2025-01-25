@@ -15,7 +15,7 @@ export const questionFormSchema = z.object({
     errorMap: () => ({ message: "Invalid status" })
   }),
   tags: z.array(z.string()),
-  metadata: z.record(z.unknown()).optional()
+  metadata: z.string().optional()
 })
 
 export type QuestionFormData = z.infer<typeof questionFormSchema>
