@@ -21,7 +21,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
-
+import { useRouter } from 'next/navigation'
 interface QuestionFormProps {
     subjects: { id: string, name: string, examType: "gce_ol" | "gce_al" }[]
     id?: string
@@ -42,6 +42,7 @@ const initialState: QuestionFormData = {
 
 
 export function QuestionForm({ subjects, question }: QuestionFormProps) {
+    const router = useRouter()
     const form = useForm<z.infer<typeof questionFormSchema>>({
         resolver: zodResolver(questionFormSchema),
         defaultValues: question ?? initialState,
@@ -55,7 +56,7 @@ export function QuestionForm({ subjects, question }: QuestionFormProps) {
             toast.error(data.message)
         } else {
             toast.success(data.message)
-            form.reset(initialState)
+            !question ? form.reset(initialState) : router.push(`/dashboard/questions`)
         }
     }
 
@@ -252,7 +253,7 @@ export function QuestionForm({ subjects, question }: QuestionFormProps) {
                             )}
                         />
                         <Button type="submit" disabled={form.formState.isSubmitting}>
-                            {form.formState.isSubmitting ? 'Creating...' : 'Create Question'}
+                            {question ? 'Update Question' : 'Create Question'}
                         </Button>
                     </form>
                 </Form>

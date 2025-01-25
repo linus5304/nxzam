@@ -1,7 +1,7 @@
 import { getQuestion } from "@/server/actions/questions";
 
 import { getSubjects } from "@/server/actions/subjects";
-import { QuestionForm } from "../_components/questions/question-form";
+import { QuestionForm } from "../../_components/questions/question-form";
 import { notFound } from "next/navigation";
 
 type Params = Promise<{ id: string }>;

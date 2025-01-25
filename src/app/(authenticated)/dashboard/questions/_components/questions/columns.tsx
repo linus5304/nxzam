@@ -1,8 +1,11 @@
 "use client"
 
-import { ColumnDef } from '@tanstack/react-table'
 import { QuestionType } from '@/schemas/questions'
+import { ColumnDef } from '@tanstack/react-table'
 
+import { DataTableColumnHeader } from '@/app/(authenticated)/_components/data-table/column-header'
+import { Button } from "@/components/ui/button"
+import { Checkbox } from '@/components/ui/checkbox'
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -10,10 +13,8 @@ import {
     DropdownMenuLabel,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Button } from "@/components/ui/button"
-import { ArrowUpDown, MoreHorizontal } from "lucide-react"
-import { Checkbox } from '@/components/ui/checkbox'
-import { DataTableColumnHeader } from '@/app/(authenticated)/_components/data-table/column-header'
+import { MoreHorizontal } from "lucide-react"
+import Link from 'next/link'
 
 export const columns: ColumnDef<QuestionType>[] = [
     {
@@ -80,7 +81,11 @@ export const columns: ColumnDef<QuestionType>[] = [
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
+                        <Link href={`/dashboard/questions/${question.id}/edit`}>
+                            <DropdownMenuItem>
+                                Edit
+                            </DropdownMenuItem>
+                        </Link>
                         <DropdownMenuItem>Delete</DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
