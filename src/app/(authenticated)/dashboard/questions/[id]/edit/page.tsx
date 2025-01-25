@@ -6,8 +6,8 @@ import { notFound } from "next/navigation";
 
 type Params = Promise<{ id: string }>;
 
-export default async function EditQuestionPage({ params }: { params: { id: string } }) {
-    const { id } = params;
+export default async function EditQuestionPage({ params }: { params: Params }) {
+    const { id } = await params;
     const subjects = await getSubjects();
     const question = await getQuestion(id);
     if (!question) {
