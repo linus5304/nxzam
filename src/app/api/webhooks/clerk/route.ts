@@ -1,5 +1,5 @@
 import { env } from "@/data/env/server";
-import { createUser } from "@/server/actions/users";
+import { createUser } from "@/features/users/actions/users";
 import { WebhookEvent } from "@clerk/nextjs/server";
 import { headers } from "next/headers";
 import { Webhook } from "svix";

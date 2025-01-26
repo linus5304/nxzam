@@ -1,5 +1,5 @@
-import { questionFormSchema } from "@/schemas/questions";
-import { getQuestionsDB } from "@/server/db/questions";
+import { questionFormSchema } from "@/features/questions/schemas/questions";
+import { getQuestionsDB } from "@/features/questions/db/questions";
 import { z } from "zod";
 import { Status } from "./types";
 
