@@ -7,7 +7,7 @@ export const SubjectTable = pgTable("subjects", {
     id,
     name: varchar({ length: 100 }).notNull(),
     code: varchar({ length: 20 }).notNull(),
-    examType: examTypeEnum().notNull(),
+    examType: examTypeEnum("exam_type").notNull(),
     description: text(),
     createdAt,
     updatedAt,
