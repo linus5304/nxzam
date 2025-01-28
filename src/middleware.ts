@@ -1,4 +1,5 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
 
 const isPublicRoute = createRouteMatcher([
   "/",
@@ -7,7 +8,17 @@ const isPublicRoute = createRouteMatcher([
   "/api(.*)",
 ]);
 
+const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
+
 export default clerkMiddleware(async (auth, req) => {
+  if (isAdminRoute(req)) {
+    const user = await auth.protect();
+    console.log("Admin user", user);
+    if (user.sessionClaims.role != "admin") {
+      return new NextResponse(null, { status: 404 });
+    }
+  }
+
   if (!isPublicRoute(req)) await auth.protect();
 });
 

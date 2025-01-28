@@ -1,7 +1,7 @@
 "use server"
 
 import { User, userSchema } from "@/features/users/schemas/users"
-import { createUserDB } from "@/features/users/db/users"
+import { insertUser } from "@/features/users/db/users"
 
 export async function createUser(data: User) {
     const { success, data: userData, error } = userSchema.safeParse(data)
@@ -10,13 +10,14 @@ export async function createUser(data: User) {
         return { error: true, message: `Error occured while creating user ${error}` }
     }
 
-    const user = await createUserDB({
+    // TODO: Review this section for clerkUserId
+    const user = await insertUser({
         id: userData.id,
         email: userData.email,
         fullName: userData.fullName,
-        passwordHash: "",
+        clerkUserId: "",
         role: userData.role,
-        profileImageUrl: userData.profileImageUrl,
+        imageUrl: userData.imageUrl,
     })
 
     return user
