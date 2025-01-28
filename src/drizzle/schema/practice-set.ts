@@ -1,21 +1,22 @@
-import { sql, relations } from "drizzle-orm";
-import { pgTable, uuid, text, timestamp, integer, jsonb, foreignKey, check, varchar, boolean } from "drizzle-orm/pg-core";
+import { relations, sql } from "drizzle-orm";
+import { boolean, check, foreignKey, integer, jsonb, pgTable, text, uuid, varchar } from "drizzle-orm/pg-core";
+import { PracticeAttemptTable, SubjectTable, UserTable, practiceTypeEnum } from "../schema";
+import { createdAt, id, updatedAt } from "../schemaHelpers";
 import { PracticeQuestionTable } from "./practice-question";
-import { PracticeAttemptTable, SubjectTable, UserTable, practiceType } from "../schema";
 
 export const PracticeSetTable = pgTable("practice_sets", {
-	id: uuid("id").defaultRandom().primaryKey().notNull(),
+	id,
 	title: varchar({ length: 255 }).notNull(),
 	description: text(),
-	practiceType: practiceType("practice_type").default('self_study').notNull(),
+	practiceType: practiceTypeEnum().default('self_study').notNull(),
 	subjectId: uuid("subject_id").notNull(),
-	createdBy: text("created_by").notNull(),
+	createdBy: uuid("created_by").notNull(),
 	topics: text().array().default([""]).notNull(),
 	durationMinutes: integer("duration_minutes"),
 	isPublic: boolean("is_public").default(false).notNull(),
 	metadata: jsonb().default({}),
-	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	createdAt,
+	updatedAt,
 }, (table) => [
 	foreignKey({
 		columns: [table.subjectId],

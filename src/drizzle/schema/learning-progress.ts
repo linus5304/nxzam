@@ -1,20 +1,21 @@
 import { sql, relations } from "drizzle-orm";
 import { pgTable, text, uuid, integer, doublePrecision, timestamp, index, foreignKey, primaryKey, check } from "drizzle-orm/pg-core";
 import { SubjectTable, UserTable } from "../schema";
+import { createdAt, updatedAt } from "../schemaHelpers";
 
 export const LearningProgressTable = pgTable("learning_progress", {
-    userId: text("user_id").notNull(),
+    userId: uuid("user_id").notNull(),
     subjectId: uuid("subject_id").notNull(),
     topic: text().notNull(),
     masteryLevel: integer("mastery_level").default(0).notNull(),
     practiceCount: integer("practice_count").default(0).notNull(),
     successRate: doublePrecision("success_rate").default(0).notNull(),
     lastPracticedAt: timestamp("last_practiced_at", { withTimezone: true, mode: 'string' }),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+    createdAt,
+    updatedAt,
 }, (table) => [
     index("idx_learning_progress_mastery").using("btree", table.masteryLevel.asc().nullsLast().op("int4_ops")),
-    index("idx_learning_progress_user").using("btree", table.userId.asc().nullsLast().op("text_ops")),
+    index("idx_learning_progress_user").using("btree", table.userId.asc().nullsLast().op("uuid_ops")),
     foreignKey({
         columns: [table.subjectId],
         foreignColumns: [SubjectTable.id],

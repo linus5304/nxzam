@@ -1,22 +1,23 @@
-import { sql, relations } from "drizzle-orm";
-import { pgTable, uuid, text, jsonb, integer, timestamp, index, foreignKey, check, varchar, boolean } from "drizzle-orm/pg-core";
-import { difficultyLevel, ExamAttemptTable, ExamQuestionTable, questionStatus } from "../schema";
-import { UserTable } from "./user";
+import { relations, sql } from "drizzle-orm";
+import { boolean, check, foreignKey, index, integer, pgTable, text, uuid, varchar } from "drizzle-orm/pg-core";
+import { ExamAttemptTable, ExamQuestionTable } from "../schema";
+import { createdAt, id, updatedAt } from "../schemaHelpers";
 import { SubjectTable } from "./subject";
+import { UserTable } from "./user";
 
 export const ExamTable = pgTable("exams", {
-    id: uuid("id").defaultRandom().primaryKey().notNull(),
+    id,
     title: varchar({ length: 255 }).notNull(),
     description: text(),
     subjectId: uuid("subject_id").notNull(),
-    createdBy: text("created_by").notNull(),
+    createdBy: uuid("created_by").notNull(),
     durationMinutes: integer("duration_minutes").notNull(),
     passingScore: integer("passing_score").notNull(),
     isPublished: boolean("is_published").default(false).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+    createdAt,
+    updatedAt,
 }, (table) => [
-    index("idx_exams_created_by").using("btree", table.createdBy.asc().nullsLast().op("text_ops")),
+    index("idx_exams_created_by").using("btree", table.createdBy.asc().nullsLast().op("uuid_ops")),
     index("idx_exams_subject").using("btree", table.subjectId.asc().nullsLast().op("uuid_ops")),
     foreignKey({
         columns: [table.createdBy],

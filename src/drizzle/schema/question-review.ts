@@ -1,15 +1,16 @@
-import { sql, relations } from "drizzle-orm";
-import { pgTable, uuid, timestamp, foreignKey, varchar, text } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
+import { foreignKey, pgTable, text, uuid, varchar } from "drizzle-orm/pg-core";
 import { QuestionTable, UserTable } from "../schema";
+import { createdAt, id, updatedAt } from "../schemaHelpers";
 
 export const QuestionReviewTable = pgTable("question_reviews", {
-    id: uuid("id").defaultRandom().primaryKey().notNull(),
+    id,
     questionId: uuid("question_id").notNull(),
-    reviewedBy: text("reviewed_by").notNull(),
+    reviewedBy: uuid("reviewed_by").notNull(),
     status: varchar({ length: 20 }).notNull(),
     feedback: text(),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+    createdAt,
+    updatedAt,
 }, (table) => [
     foreignKey({
         columns: [table.questionId],

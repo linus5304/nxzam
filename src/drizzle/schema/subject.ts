@@ -1,15 +1,16 @@
 import { relations } from "drizzle-orm";
-import { pgTable, uuid, varchar, text, timestamp, unique } from "drizzle-orm/pg-core";
-import { examType, ExamTable, QuestionTable, PracticeSetTable, LearningProgressTable } from "../schema";
+import { pgTable, text, unique, varchar } from "drizzle-orm/pg-core";
+import { ExamTable, LearningProgressTable, PracticeSetTable, QuestionTable, examTypeEnum } from "../schema";
+import { createdAt, id, updatedAt } from "../schemaHelpers";
 
 export const SubjectTable = pgTable("subjects", {
-    id: uuid("id").defaultRandom().primaryKey().notNull(),
+    id,
     name: varchar({ length: 100 }).notNull(),
     code: varchar({ length: 20 }).notNull(),
-    examType: examType("exam_type").notNull(),
+    examType: examTypeEnum().notNull(),
     description: text(),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+    createdAt,
+    updatedAt,
 }, (table) => [
     unique("subjects_name_code_key").on(table.name, table.code),
 ]);

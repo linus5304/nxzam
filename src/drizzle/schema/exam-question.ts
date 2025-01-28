@@ -1,13 +1,15 @@
-import { sql, relations } from "drizzle-orm";
-import { pgTable, uuid, integer, timestamp, foreignKey, primaryKey, check } from "drizzle-orm/pg-core";
+import { relations, sql } from "drizzle-orm";
+import { check, foreignKey, integer, pgTable, primaryKey, uuid } from "drizzle-orm/pg-core";
 import { ExamTable, QuestionTable } from "../schema";
+import { createdAt, updatedAt } from "../schemaHelpers";
 
 export const ExamQuestionTable = pgTable("exam_questions", {
 	examId: uuid("exam_id").notNull(),
 	questionId: uuid("question_id").notNull(),
 	questionOrder: integer("question_order").notNull(),
 	points: integer().default(1).notNull(),
-	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	createdAt,
+	updatedAt,
 }, (table) => [
 	foreignKey({
 		columns: [table.examId],

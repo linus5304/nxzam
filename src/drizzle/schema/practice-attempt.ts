@@ -1,18 +1,19 @@
 import { relations, sql } from "drizzle-orm";
-import { pgTable, uuid, text, timestamp, foreignKey, integer, jsonb, check } from "drizzle-orm/pg-core";
-import { UserTable, PracticeSetTable } from "../schema";
+import { check, foreignKey, integer, jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { PracticeSetTable, UserTable } from "../schema";
+import { createdAt, id, updatedAt } from "../schemaHelpers";
 
 export const PracticeAttemptTable = pgTable("practice_attempts", {
-	id: uuid("id").defaultRandom().primaryKey().notNull(),
+	id,
 	practiceSetId: uuid("practice_set_id").notNull(),
-	userId: text("user_id").notNull(),
+	userId: uuid("user_id").notNull(),
 	startedAt: timestamp("started_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	completedAt: timestamp("completed_at", { withTimezone: true, mode: 'string' }),
 	score: integer(),
 	answers: jsonb(),
 	feedback: jsonb(),
-	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	createdAt,
+	updatedAt,
 }, (table) => [
 	foreignKey({
 		columns: [table.userId],

@@ -1,20 +1,21 @@
 import { sql, relations } from "drizzle-orm";
 import { pgTable, uuid, text, integer, jsonb, timestamp, foreignKey, check, index } from "drizzle-orm/pg-core";
 import { ExamTable, UserTable } from "../schema";
+import { createdAt, id, updatedAt } from "../schemaHelpers";
 
 export const ExamAttemptTable = pgTable("exam_attempts", {
-	id: uuid("id").defaultRandom().primaryKey().notNull(),
+	id,
 	examId: uuid("exam_id").notNull(),
-	userId: text("user_id").notNull(),
+	userId: uuid("user_id").notNull(),
 	startedAt: timestamp("started_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	completedAt: timestamp("completed_at", { withTimezone: true, mode: 'string' }),
 	score: integer(),
 	answers: jsonb(),
-	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	createdAt,
+	updatedAt,
 }, (table) => [
 	index("idx_exam_attempts_exam").using("btree", table.examId.asc().nullsLast().op("uuid_ops")),
-	index("idx_exam_attempts_user").using("btree", table.userId.asc().nullsLast().op("text_ops")),
+	index("idx_exam_attempts_user").using("btree", table.userId.asc().nullsLast().op("uuid_ops")),
 	foreignKey({
 		columns: [table.examId],
 		foreignColumns: [ExamTable.id],

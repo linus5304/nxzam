@@ -1,18 +1,21 @@
 import { relations } from "drizzle-orm";
 import { pgTable, text, varchar, timestamp, unique } from "drizzle-orm/pg-core";
-import { userRole, ExamTable, QuestionTable, ExamAttemptTable, PracticeSetTable, PracticeAttemptTable, QuestionReviewTable, LearningProgressTable } from "../schema";
+import { ExamTable, QuestionTable, ExamAttemptTable, PracticeSetTable, PracticeAttemptTable, QuestionReviewTable, LearningProgressTable, userRoleEnum } from "../schema";
+import { createdAt, id, updatedAt } from "../schemaHelpers";
 
 export const UserTable = pgTable("users", {
-    id: text('id').primaryKey().notNull(),
+    id,
+    clerkUserId: text("clerk_user_id").notNull(),
     email: varchar({ length: 255 }).notNull(),
     fullName: varchar("full_name", { length: 255 }).notNull(),
-    passwordHash: varchar("password_hash", { length: 255 }).notNull(),
-    role: userRole().default('org:student').notNull(),
-    profileImageUrl: text("profile_image_url"),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+    role: userRoleEnum().notNull().default("user"),
+    imageUrl: text("image_url"),
+    deletedAt: timestamp({ withTimezone: true }),
+    createdAt,
+    updatedAt,
 }, (table) => [
     unique("users_email_key").on(table.email),
+    unique("users_clerk_user_id_key").on(table.clerkUserId),
 ]);
 
 export const usersRelations = relations(UserTable, ({ many }) => ({

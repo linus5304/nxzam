@@ -1,23 +1,24 @@
-import { sql, relations } from "drizzle-orm";
-import { uuid, text, timestamp, integer, jsonb, index, foreignKey, check, pgTable, varchar } from "drizzle-orm/pg-core";
-import { ExamQuestionTable, difficultyLevel, PracticeQuestionTable, QuestionReviewTable, questionStatus, SubjectTable, UserTable } from "../schema";
+import { relations, sql } from "drizzle-orm";
+import { check, foreignKey, index, integer, jsonb, pgTable, text, uuid } from "drizzle-orm/pg-core";
+import { difficultyLevelEnum, ExamQuestionTable, PracticeQuestionTable, QuestionReviewTable, questionStatusEnum, SubjectTable, UserTable } from "../schema";
+import { createdAt, id, updatedAt } from "../schemaHelpers";
 
 export const QuestionTable = pgTable("questions", {
-    id: uuid("id").defaultRandom().primaryKey().notNull(),
+    id,
     subjectId: uuid("subject_id").notNull(),
-    createdBy: text("created_by").notNull(),
+    createdBy: uuid("created_by").notNull(),
     questionText: text("question_text").notNull(),
     explanation: text(),
     options: jsonb().notNull(),
     correctAnswer: integer("correct_answer").notNull(),
-    difficulty: difficultyLevel().default('medium').notNull(),
-    status: questionStatus().default('draft').notNull(),
+    difficulty: difficultyLevelEnum().default('medium').notNull(),
+    status: questionStatusEnum().default('draft').notNull(),
     tags: text().array().default([""]).notNull(),
     metadata: jsonb().default({}).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+    createdAt,
+    updatedAt,
 }, (table) => [
-    index("idx_questions_created_by").using("btree", table.createdBy.asc().nullsLast().op("text_ops")),
+    index("idx_questions_created_by").using("btree", table.createdBy.asc().nullsLast().op("uuid_ops")),
     index("idx_questions_difficulty").using("btree", table.difficulty.asc().nullsLast().op("enum_ops")),
     index("idx_questions_status").using("btree", table.status.asc().nullsLast().op("enum_ops")),
     index("idx_questions_subject").using("btree", table.subjectId.asc().nullsLast().op("uuid_ops")),
