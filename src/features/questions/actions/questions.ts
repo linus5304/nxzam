@@ -5,9 +5,10 @@ import { QuestionFormData, questionFormSchema, QuestionsFilterParams, QuestionTy
 import { createQuestionDB, deleteQuestionDB, getQuestionDB, getQuestionsDB, updateQuestionDB } from '@/features/questions/db/questions'
 import { auth } from '@clerk/nextjs/server'
 import { z } from 'zod'
+import { getCurrentUser } from '@/services/clerk'
 
 export async function createQuestion(unsafeData: z.infer<typeof questionFormSchema>) {
-  const { userId } = await auth()
+  const { userId } = await getCurrentUser()
   const { success, data } = questionFormSchema.safeParse(unsafeData)
   if (!success || userId == null) {
     return {
