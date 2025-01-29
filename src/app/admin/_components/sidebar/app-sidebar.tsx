@@ -11,9 +11,9 @@ import {
 } from "lucide-react"
 import * as React from "react"
 
-import { NavMain } from "@/components/sidebar/nav-main"
-import { NavSecondary } from "@/components/sidebar/nav-secondary"
-import { NavUser } from "@/components/sidebar/nav-user"
+import { NavMain } from "@/app/admin/_components/sidebar/nav-main"
+import { NavSecondary } from "@/app/admin/_components/sidebar/nav-secondary"
+import { NavUser } from "@/app/admin/_components/sidebar/nav-user"
 import {
   Sidebar,
   SidebarContent,
@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/sidebar"
 import { Icons } from "@/lib/icons"
 import { NavOthers } from "./nav-others"
+import Link from "next/link"
 
 const data = {
   user: {
@@ -86,12 +87,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
         <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <a href="#">
-                <Icons.LogoDark size={140} />
-              </a>
-            </SidebarMenuButton>
+          <SidebarMenuItem className="flex justify-center items-center py-2">
+            <Link href="/admin">
+              <Icons.LogoDark size={140} />
+            </Link>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
