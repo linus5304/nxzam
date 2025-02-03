@@ -1,3 +1,5 @@
+"use client"
+
 import { Table } from "@tanstack/react-table"
 import {
     ChevronLeft,
@@ -14,6 +16,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
 interface DataTablePaginationProps<TData> {
     table: Table<TData>
@@ -22,6 +25,22 @@ interface DataTablePaginationProps<TData> {
 export function DataTablePagination<TData>({
     table,
 }: DataTablePaginationProps<TData>) {
+    const searchParams = useSearchParams()
+    const pathname = usePathname()
+    const { replace } = useRouter()
+
+    const handlePageSizeChange = (value: string) => {
+        const params = new URLSearchParams(searchParams)
+        if (value) {
+            params.set("page", "0")
+            params.set("pageSize", value)
+        } else {
+            params.delete("page")
+            params.delete("pageSize")
+        }
+        replace(`${pathname}?${params.toString()}`)
+    }
+
     return (
         <div className="flex items-center justify-between px-2">
             <div className="flex-1 text-sm text-muted-foreground">
@@ -32,9 +51,9 @@ export function DataTablePagination<TData>({
                 <div className="flex items-center space-x-2">
                     <p className="text-sm font-medium">Rows per page</p>
                     <Select
-                        value={`${table.getState().pagination.pageSize}`}
+                        value={searchParams.get("pageSize") ?? "10"}
                         onValueChange={(value) => {
-                            table.setPageSize(Number(value))
+                            handlePageSizeChange(value)
                         }}
                     >
                         <SelectTrigger className="h-8 w-[70px]">

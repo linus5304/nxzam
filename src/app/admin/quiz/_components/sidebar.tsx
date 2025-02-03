@@ -3,10 +3,11 @@
 import { cn } from "@/lib/utils"
 import { BookAIcon, BookOpenIcon, SettingsIcon } from "lucide-react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { useParams, usePathname } from "next/navigation"
 
 export function QuizSidebar() {
     const pathname = usePathname()
+    const { id } = useParams()
     return (
         <div>
             <div className="flex flex-col gap-2">
@@ -18,7 +19,7 @@ export function QuizSidebar() {
                         <span>Overview</span>
                     </div>
                 </Link>
-                <Link href="/admin/quiz/create">
+                <Link href={`/admin/quiz/${id}/questions`}>
                     <div className="flex items-center gap-2 hover:bg-muted p-2 rounded-md animate-in fade-in-0 duration-300 transition-colors">
                         <BookOpenIcon size={16} />
                         <span>Questions</span>

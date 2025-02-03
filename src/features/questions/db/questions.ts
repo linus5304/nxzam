@@ -28,10 +28,14 @@ export async function getQuestionDB(id: string) {
 }
 
 export async function getQuestionsDB(filterParams: QuestionsFilterParams) {
+    console.log("filterParams", filterParams)
+    const page = filterParams.page ?? 0
+    const pageSize = filterParams.pageSize ?? 10
+
     const questions = await db.query.QuestionTable.findMany({
         where: (question, { eq, ilike }) => {
-            if (filterParams.questionText) {
-                return ilike(question.questionText, `%${filterParams.questionText}%`)
+            if (filterParams.query) {
+                return ilike(question.questionText, `%${filterParams.query}%`)
             }
             if (filterParams.subjectId) {
                 return eq(question.subjectId, filterParams.subjectId)
@@ -50,7 +54,9 @@ export async function getQuestionsDB(filterParams: QuestionsFilterParams) {
                     name: true
                 }
             }
-        }
+        },
+        limit: pageSize,
+        offset: page * pageSize
     })
     return questions as (typeof QuestionTable.$inferSelect & {
         subject: Pick<typeof SubjectTable.$inferSelect, 'id' | 'name'>

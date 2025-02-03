@@ -20,11 +20,8 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
+import { DataTablePagination } from "@/features/quiz/components/table/pagination"
 import { useState } from "react"
-import { Input } from "@/components/ui/input"
-import { DataTablePagination } from "@/features/questions/components/table/pagination"
-import Link from "next/link"
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
@@ -58,21 +55,6 @@ export function DataTable<TData, TValue>({
 
     return (
         <>
-            <div className="flex items-center py-4">
-                <Input
-                    placeholder="Filter quizzes..."
-                    value={(table.getColumn("questionText")?.getFilterValue() as string) ?? ""}
-                    onChange={(event) =>
-                        table.getColumn("questionText")?.setFilterValue(event.target.value)
-                    }
-                    className="max-w-sm"
-                />
-                <Button asChild className="ml-auto">
-                    <Link href="/admin/quiz/new">
-                        Create Quiz
-                    </Link>
-                </Button>
-            </div>
             <div className="rounded-md border mb-4">
                 <Table>
                     <TableHeader>
@@ -94,7 +76,7 @@ export function DataTable<TData, TValue>({
                         ))}
                     </TableHeader>
                     <TableBody>
-                        {table.getRowModel().rows?.length ? (
+                        {table.getRowModel().rows.length > 0 ? (
                             table.getRowModel().rows.map((row) => (
                                 <TableRow
                                     key={row.id}
