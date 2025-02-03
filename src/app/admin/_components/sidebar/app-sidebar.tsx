@@ -43,7 +43,7 @@ const data = {
     },
     {
       title: "Quizzes",
-      url: "/admin/quizzes",
+      url: "/admin/quiz",
       icon: SquareTerminal,
       isActive: true,
       items: [

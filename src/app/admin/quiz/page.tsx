@@ -8,7 +8,7 @@ export default async function QuestionsPage() {
     const subjects = await getSubjects()
 
     return (
-        <div className="container mx-auto py-6">
+        <div>
             <h1 className="text-3xl font-bold mb-6">Quizzes</h1>
             <DataTable columns={columns} data={initialQuestions} />
         </div>
