@@ -10,3 +10,4 @@ export * from "./schema/question-review";
 export * from "./schema/question";
 export * from "./schema/subject";
 export * from "./schema/user";
+export * from "./schema/quiz";
