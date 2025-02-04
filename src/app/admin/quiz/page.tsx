@@ -1,21 +1,32 @@
-import { getQuestions } from '@/features/questions/actions/questions'
-import { getSubjects } from '@/features/subjects/actions/subjects'
-import { DataTable } from '@/features/quiz/components/table/data-table'
-import { columns } from '@/features/quiz/components/table/columns'
+import { getQuizList } from '@/features/quiz/actions/quiz'
+import { QuizCard } from '@/features/quiz/components/quiz-card'
+import Link from 'next/link'
 
-export default async function QuestionsPage() {
-    const initialQuestions = await getQuestions({})
-    const subjects = await getSubjects()
+export default async function QuizPage() {
+    const quizzes = await getQuizList()
 
     return (
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
             <h1 className="text-3xl font-bold mb-6">Quizzes</h1>
             <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-                <div className="aspect-video rounded-xl bg-muted/50" />
-                <div className="aspect-video rounded-xl bg-muted/50" />
-                <div className="aspect-video rounded-xl bg-muted/50" />
+                {quizzes.map((quiz) => (
+                    <Link href={`/admin/quiz/${quiz.id}`} key={quiz.id}>
+                        <QuizCard quiz={{
+                            id: quiz.id,
+                            title: quiz.title,
+                            description: quiz.description ?? '',
+                            subjectId: quiz.subjectId,
+                            createdBy: quiz.createdBy,
+                            difficulty: quiz.difficulty,
+                            durationMinutes: quiz.durationMinutes,
+                            isPublished: quiz.isPublished,
+                            topics: quiz.topics,
+                            totalQuestions: quiz.totalQuestions,
+                            passingScore: quiz.passingScore,
+                        }} />
+                    </Link>
+                ))}
             </div>
-            <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" />
         </div>
     )
 }

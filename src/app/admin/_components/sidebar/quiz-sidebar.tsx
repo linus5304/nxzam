@@ -23,14 +23,18 @@ export function QuizSidebar() {
                     </div>
                 </Link>
                 <Link href={`/admin/quiz/${id}/questions`}>
-                    <div className="flex items-center gap-2 hover:bg-muted p-2 rounded-md animate-in fade-in-0 duration-300 transition-colors">
+                    <div className={cn("flex items-center gap-2 hover:bg-muted p-2 rounded-md animate-in fade-in-0 duration-300 transition-colors", {
+                        "bg-muted": pathname === `/admin/quiz/${id}/questions`
+                    })}>
                         <BookOpenIcon size={16} />
                         <span>Questions</span>
                     </div>
                 </Link>
 
                 <Link href={`/admin/quiz/${id}/settings`}>
-                    <div className="flex items-center gap-2 hover:bg-muted p-2 rounded-md animate-in fade-in-0 duration-300 transition-colors">
+                    <div className={cn("flex items-center gap-2 hover:bg-muted p-2 rounded-md animate-in fade-in-0 duration-300 transition-colors", {
+                        "bg-muted": pathname === `/admin/quiz/${id}/settings`
+                    })}>
                         <SettingsIcon size={16} />
                         <span>Settings</span>
                     </div>

@@ -1,7 +1,7 @@
 'use server'
 
 import { auth } from '@clerk/nextjs/server'
-import { createQuizDB } from '../db/quiz'
+import { createQuizDB, getQuizListDB } from '../db/quiz'
 import { quizSchema } from '../schemas/quiz'
 import { z } from 'zod'
 
@@ -41,4 +41,9 @@ export async function create(_prevState: unknown, formData: FormData) {
     return { defaultValues, success: false, message: "Failed to create quiz", errors: null }
   }
 
+}
+
+export async function getQuizList() {
+  const quizzes = await getQuizListDB()
+  return quizzes
 }
