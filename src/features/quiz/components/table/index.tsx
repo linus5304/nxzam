@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { DataTable } from "./data-table";
-import { Search } from "./search";
+import { Search, SearchSuspense } from "./search";
 import Link from "next/link";
 import { columns } from "./columns";
 import { getQuestions } from "@/features/questions/actions/questions";
@@ -22,7 +22,7 @@ export async function Table(props: {
     return (
         <div>
             <div className="flex items-center py-4 gap-2">
-                <Search placeholder="Search quizzes..." />
+                <SearchSuspense placeholder="Search quizzes..." />
                 <Button asChild className="ml-auto">
                     <Link href="/admin/quiz/new">
                         Create Quiz

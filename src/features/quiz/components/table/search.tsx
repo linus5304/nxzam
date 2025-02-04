@@ -3,6 +3,7 @@
 import { Input } from "@/components/ui/input"
 import { SearchIcon } from "lucide-react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { Suspense } from "react"
 import { useDebouncedCallback } from "use-debounce"
 
 export function Search({ placeholder }: { placeholder: string }) {
@@ -32,3 +33,11 @@ export function Search({ placeholder }: { placeholder: string }) {
         </div>
     )
 }
+
+export function SearchSuspense({ placeholder }: { placeholder: string }) {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <Search placeholder={placeholder} />
+        </Suspense>
+    )
+}   
