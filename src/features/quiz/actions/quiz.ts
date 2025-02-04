@@ -5,42 +5,33 @@ import { createQuizDB, getQuizListDB } from '../db/quiz'
 import { quizSchema } from '../schemas/quiz'
 import { z } from 'zod'
 
-export async function create(_prevState: unknown, formData: FormData) {
-  const defaultValues = z.record(z.string(), z.string()).parse(Object.fromEntries(formData));
+export async function create(unsafeData: z.infer<typeof quizSchema>) {
+  const { success, data } = quizSchema.safeParse(unsafeData)
+  if (!success) {
+    return { error: false, message: "Invalid form data" }
+  }
+  const { userId } = await auth();
 
-  const durationMinutes = z.number().parse(Number(defaultValues.durationMinutes))
-  const totalQuestions = z.number().parse(Number(defaultValues.totalQuestions))
-  const passingScore = z.number().parse(Number(defaultValues.passingScore))
-
-  console.log("defaultValues", defaultValues)
-
-  try {
-    const data = quizSchema.parse({
-      ...defaultValues,
-      durationMinutes,
-      totalQuestions,
-      passingScore
-    });
-
-    const { userId } = await auth();
-
-    if (!userId) {
-      return { success: false, message: "Unauthorized" }
-    }
-
-    const quiz = await createQuizDB({
-      ...data,
-      createdBy: userId,
-    });
-
-    return { defaultValues: {}, success: true, message: "Quiz created successfully", errors: null }
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return { defaultValues, success: false, message: "Invalid form data", errors: error.flatten().fieldErrors }
-    }
-    return { defaultValues, success: false, message: "Failed to create quiz", errors: null }
+  if (!userId) {
+    return { error: true, message: "Unauthorized" }
   }
 
+  await createQuizDB({
+    ...data,
+    createdBy: userId,
+  });
+
+  return { error: false, message: "Quiz created successfully" }
+}
+
+export async function update(id: string, unsafeData: z.infer<typeof quizSchema>) {
+  const { success, data } = quizSchema.safeParse(unsafeData)
+  if (!success) {
+    return { error: false, message: "Invalid form data" }
+  }
+
+  // await updateQuizDB(id, data)
+  return { error: true, message: "Quiz updated successfully" }
 }
 
 export async function getQuizList() {

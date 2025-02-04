@@ -12,7 +12,7 @@ import {
     FormMessage
 } from "@/components/ui/form"
 import { Input } from '@/components/ui/input'
-import { NumberInput } from "@/components/ui/number-input"
+import { NumberInput } from "@/components/form/number-input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { QuestionFormData, questionFormSchema } from '@/features/questions/schemas/questions'
@@ -161,11 +161,12 @@ export function QuestionForm({ subjects, question }: QuestionFormProps) {
                                     <FormLabel>Correct Answer</FormLabel>
                                     <FormControl>
                                         <NumberInput
-                                            min={0}
-                                            max={form.getValues('options').length - 1}
-                                            value={field.value}
-                                            onChange={(value) => field.onChange(value ?? 0)}
-                                            placeholder="Enter option number (0-based)"
+                                            label="Passing Score"
+                                            name="passingScore"
+                                            min={1}
+                                            max={100}
+                                            allowDecimals={false}
+                                            defaultValue={field.value}
                                         />
                                     </FormControl>
                                     <FormDescription>

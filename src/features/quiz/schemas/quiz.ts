@@ -9,6 +9,7 @@ export const quizSchema = z.object({
   passingScore: z.number().int().min(0, "Passing score must be 0 or greater"),
   totalQuestions: z.number().int().positive("Total questions must be a positive number"),
   status: z.enum(['draft', 'published', 'archived']).optional(),
+  questions: z.array(z.string()).optional(),
   topics: z.array(z.string()).optional(),
   tags: z.array(z.string()).optional(),
   metadata: z.string().optional()

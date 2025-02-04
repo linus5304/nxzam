@@ -21,10 +21,11 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Input } from "@/components/ui/input"
 import { DataTablePagination } from "@/features/questions/components/table/pagination"
 import Link from "next/link"
+import { useFormContext } from "react-hook-form"
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
@@ -55,6 +56,13 @@ export function DataTable<TData, TValue>({
             rowSelection,
         },
     })
+
+    console.log("selection", table.getFilteredSelectedRowModel().flatRows.map((row) => row.original))
+    const { setValue, getValues, formState } = useFormContext()
+    useEffect(() => {
+        setValue("questions", table.getFilteredSelectedRowModel().flatRows.map((row) => row.original))
+        console.log("questions", formState.defaultValues)
+    }, [table.getFilteredSelectedRowModel().flatRows])
 
     return (
         <>

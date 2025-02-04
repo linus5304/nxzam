@@ -21,9 +21,10 @@ interface NumberInputProps {
     description?: string
     required?: boolean
     className?: string
+    defaultValue?: number
 }
 
-export function NumberInputField({
+export function NumberInput({
     label,
     name,
     min,
@@ -33,6 +34,7 @@ export function NumberInputField({
     description,
     required = false,
     className,
+    defaultValue,
 }: NumberInputProps) {
     const form = useFormContext()
 
@@ -88,6 +90,7 @@ export function NumberInputField({
                         <Input
                             {...field}
                             type="number"
+                            defaultValue={defaultValue}
                             min={min}
                             max={max}
                             placeholder={placeholder}
