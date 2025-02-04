@@ -1,7 +1,9 @@
 import { DynamicBreadcrumb } from "@/components/dynamic-breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { Icons } from "@/lib/icons";
-import { QuizSidebar } from "./_components/sidebar";
+import { QuizSidebar } from "@/app/admin/_components/sidebar/quiz-sidebar";
+import { QuestionsSidebar } from "@/app/admin/_components/sidebar/question-sidebar";
+import { AppSidebar } from "./_components/sidebar/sidebar";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
 
@@ -18,7 +20,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </header>
             <div className="container mx-auto p-4 md:p-6 lg:p-8 grid grid-cols-12 gap-4">
                 <div className="col-span-12 md:col-span-3 lg:col-span-2">
+                    <AppSidebar />
                     <QuizSidebar />
+                    <QuestionsSidebar />
                 </div>
                 <div className="col-span-12 md:col-span-9 lg:col-span-10">
                     {children}
