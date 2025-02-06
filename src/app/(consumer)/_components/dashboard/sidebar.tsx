@@ -1,11 +1,9 @@
 "use client"
 
 import { NavMain } from "@/app/(consumer)/_components/sidebar/nav-main"
-import { NavUser } from "@/app/(consumer)/_components/sidebar/nav-user"
-import { NavSecondary } from "@/app/admin/_components/sidebar/nav-secondary"
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuItem } from "@/components/ui/sidebar"
+import { Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem } from "@/components/ui/sidebar"
 import { Icons } from "@/lib/icons"
-import { BookOpen, ChartBar, Frame, GraduationCap, LifeBuoy, Map, PieChart, Send, Settings, SquareTerminal, Trophy } from "lucide-react"
+import { BookOpen, ChartBar, GraduationCap, Settings, Trophy } from "lucide-react"
 import Link from "next/link"
 
 const subjects = ["Math", "Science", "English", "History", "Geography", "Physics", "Chemistry", "Biology"]
