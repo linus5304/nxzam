@@ -1,9 +1,10 @@
 'use server'
 
 import { auth } from '@clerk/nextjs/server'
-import { createQuizDB, getQuizDB, getQuizListDB, updateDB } from '../db/quiz'
+import { createQuizDB, deleteDB, getQuizDB, getQuizListDB, updateDB } from '../db/quiz'
 import { quizSchema } from '../schemas/quiz'
 import { z } from 'zod'
+import { redirect } from 'next/navigation'
 
 export async function create(unsafeData: z.infer<typeof quizSchema>) {
   const { success, data } = quizSchema.safeParse(unsafeData)
@@ -21,8 +22,7 @@ export async function create(unsafeData: z.infer<typeof quizSchema>) {
     createdBy: userId,
     questionIds: data?.questionIds ?? []
   });
-
-  return { error: false, message: "Quiz created successfully" }
+  redirect(`/admin/quiz`)
 }
 
 export async function update(id: string, unsafeData: z.infer<typeof quizSchema>) {
@@ -49,6 +49,24 @@ export async function getQuiz(id: string) {
 }
 
 export async function getQuizList() {
+  const { userId } = await auth();
+
+  if (!userId) {
+    return { error: true, message: "Unauthorized" }
+  }
   const quizzes = await getQuizListDB()
   return quizzes
+}
+
+export async function deleteQuiz(id: string) {
+  const { userId } = await auth();
+
+  if (!userId) {
+    return { error: true, message: "Unauthorized" }
+  }
+  const quiz = await deleteDB(id)
+  if (quiz == null) {
+    return { error: true, message: "Error deleting quiz" }
+  }
+  redirect(`/admin/quiz`)
 }

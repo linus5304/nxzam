@@ -34,4 +34,4 @@
 
 ### 05/02/2025
 
-- [ ] Add question to quiz on quiz creation and update
+- [x] Add question to quiz on quiz creation and update

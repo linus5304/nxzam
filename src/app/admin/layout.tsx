@@ -4,6 +4,7 @@ import { Icons } from "@/lib/icons";
 import { QuizSidebar } from "@/app/admin/_components/sidebar/quiz-sidebar";
 import { QuestionsSidebar } from "@/app/admin/_components/sidebar/question-sidebar";
 import { AppSidebar } from "./_components/sidebar/sidebar";
+import Link from "next/link";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
 
@@ -11,7 +12,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <>
             <header className="container mx-auto flex sticky top-0 bg-background h-16 shrink-0 items-center gap-2 border-b px-4">
                 <div className="flex items-center gap-2 px-4">
-                    <Icons.LogoDark size={140} />
+                    <Link href="/admin">
+                        <Icons.LogoDark size={140} />
+                    </Link>
                 </div>
                 <div className="flex items-center gap-2 px-4">
                     <Separator orientation="vertical" className="mr-2 h-4" />

@@ -20,10 +20,12 @@ export async function createQuizDB(data: typeof QuizTable.$inferInsert & { quest
                 throw new Error("Failed to create quiz")
             }
 
-            await tx.insert(QuizQuestionTable).values(data.questionIds.map((questionId) => ({
-                quizId: newQuiz.id,
-                questionId: questionId
-            })))
+            if (data.questionIds.length > 0) {
+                await tx.insert(QuizQuestionTable).values(data.questionIds.map((questionId) => ({
+                    quizId: newQuiz.id,
+                    questionId: questionId
+                })))
+            }
 
             return newQuiz
         })
@@ -120,7 +122,11 @@ export async function updateDB(id: string, data: Partial<typeof QuizTable.$infer
     return updatedQuiz
 }
 
-export async function deleteQuestionDB(id: string) {
-    const question = await db.delete(QuestionTable).where(eq(QuestionTable.id, id))
-    return question
+export async function deleteDB(id: string) {
+    const quiz = await db.transaction(async (tx) => {
+        await tx.delete(QuizQuestionTable).where(eq(QuizQuestionTable.quizId, id))
+        const [quiz] = await tx.delete(QuizTable).where(eq(QuizTable.id, id)).returning({ id: QuizTable.id })
+        return quiz
+    })
+    return quiz
 }
