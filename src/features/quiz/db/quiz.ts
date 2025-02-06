@@ -60,11 +60,11 @@ export async function getQuestionsDB(filterParams: QuestionsFilterParams) {
 }
 
 export async function updateQuestionDB(question: typeof QuestionTable.$inferInsert, { id, userId }: { id: string, userId: string }) {
-    const { rowCount } = await db
+    const updatedQuestion = await db
         .update(QuestionTable)
         .set(question)
-        .where(and(eq(QuestionTable.id, id), eq(QuestionTable.createdBy, userId)));
-    return rowCount > 0
+        .where(and(eq(QuestionTable.id, id), eq(QuestionTable.createdBy, userId))).returning();
+    return updatedQuestion
 }
 
 export async function deleteQuestionDB(id: string) {
