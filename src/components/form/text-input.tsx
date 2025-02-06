@@ -8,6 +8,7 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 import { useFormContext } from "react-hook-form"
+import { cn } from "@/lib/utils"
 
 interface TextInputProps {
     label: string
@@ -16,6 +17,7 @@ interface TextInputProps {
     description?: string
     required?: boolean
     className?: string
+    hidden?: boolean
 }
 
 export function TextInput({
@@ -24,7 +26,8 @@ export function TextInput({
     placeholder,
     description,
     required = false,
-    className = ""
+    className = "",
+    hidden = false
 }: TextInputProps) {
     const form = useFormContext()
 
@@ -39,7 +42,7 @@ export function TextInput({
                         <Input
                             placeholder={placeholder}
                             {...field}
-                            className={className}
+                            className={cn(className, hidden && "hidden")}
                         />
                     </FormControl>
                     {description && (

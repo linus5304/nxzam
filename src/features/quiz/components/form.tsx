@@ -1,20 +1,27 @@
 'use client'
 
+import { NumberInput } from '@/components/form/number-input'
 import { SelectInput } from '@/components/form/select-input'
 import { TextInput } from '@/components/form/text-input'
-import { NumberInput } from '@/components/form/number-input'
 import { Button } from '@/components/ui/button'
 import { Form } from '@/components/ui/form'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
-import { actionToast } from '@/hooks/use-toast'
+import {
+    Sheet,
+    SheetContent,
+    SheetDescription,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
+} from "@/components/ui/sheet"
+import { DevTool } from "@hookform/devtools"
 import { zodResolver } from '@hookform/resolvers/zod'
+import { PlusIcon } from "lucide-react"
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
-import { create, update } from '../actions/quiz'
 import { quizSchema } from '../schemas/quiz'
-import { QuizQuestionSheet } from './quiz-question-sheet'
 
 export function QuizForm({ subjects, children, quiz }: {
     subjects: {
@@ -139,7 +146,12 @@ export function QuizForm({ subjects, children, quiz }: {
 
                     <Separator />
                     <div>
-                        <Label htmlFor="questions">Questions</Label>
+                        <TextInput
+                            label="Questions"
+                            name="questions"
+                            placeholder="Enter quiz questions"
+                            hidden
+                        />
                         <QuizQuestionSheet>
                             {children}
                         </QuizQuestionSheet>
@@ -153,7 +165,31 @@ export function QuizForm({ subjects, children, quiz }: {
                         </Button>
                     </div>
                 </form>
+                <DevTool control={form.control} />
             </Form>
         </>
+    )
+}
+
+
+function QuizQuestionSheet({ children }: { children: React.ReactNode }) {
+    return (
+        <Sheet>
+            <SheetTrigger asChild>
+                <Button variant="outline">
+                    <PlusIcon className="w-4 h-4" />
+                    Add Question
+                </Button>
+            </SheetTrigger>
+            <SheetContent className="min-w-[800px]">
+                <SheetHeader>
+                    <SheetTitle>Select Questions</SheetTitle>
+                    <SheetDescription>
+                        Select the questions you want to add to the quiz.
+                    </SheetDescription>
+                </SheetHeader>
+                {children}
+            </SheetContent>
+        </Sheet>
     )
 }
