@@ -35,3 +35,8 @@
 ### 05/02/2025
 
 - [x] Add question to quiz on quiz creation and update
+
+### 06/02/2025
+
+- [ ] User should be able to take a quiz
+- [ ] User should be able to see the quiz results

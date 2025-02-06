@@ -1,5 +1,5 @@
 import { db } from "@/drizzle/db";
-import { UserTable } from "@/drizzle/schema";
+import { UserRole, UserTable } from "@/drizzle/schema";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
@@ -16,7 +16,7 @@ export async function getCurrentUser({ allData = false } = {}) {
     return {
         clerkUserId: userId,
         userId: sessionClaims?.dbId as string,
-        role: sessionClaims?.role,
+        role: sessionClaims?.role as UserRole,
         user:
             allData && sessionClaims?.dbId != null ? await getUser(sessionClaims.dbId as string) : undefined,
         redirectToSignIn,

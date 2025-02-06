@@ -1,5 +1,7 @@
-import DashboardPage from "@/app/(consumer)/_components/dashboard";
-
-export default function UserPage() {
-    return <DashboardPage />
+export default function DashboardPage() {
+    return (
+        <div>
+            <h1>Dashboard</h1>
+        </div>
+    )
 }
