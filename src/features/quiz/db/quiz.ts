@@ -38,7 +38,16 @@ export async function createQuizDB(data: typeof QuizTable.$inferInsert & { quest
 }
 
 export async function getQuizListDB() {
-    return await db.query.QuizTable.findMany()
+    return db.query.QuizTable.findMany({
+        with: {
+            subject: {
+                columns: {
+                    id: true,
+                    name: true
+                }
+            }
+        }
+    })
 }
 
 export async function getQuizDB(id: string) {

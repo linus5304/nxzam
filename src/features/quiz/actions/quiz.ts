@@ -49,11 +49,6 @@ export async function getQuiz(id: string) {
 }
 
 export async function getQuizList() {
-  const { userId } = await auth();
-
-  if (!userId) {
-    return { error: true, message: "Unauthorized" }
-  }
   const quizzes = await getQuizListDB()
   return quizzes
 }
