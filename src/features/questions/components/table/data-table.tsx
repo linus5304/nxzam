@@ -60,7 +60,7 @@ export function DataTable<TData, TValue>({
 
     const form = useFormContext()
     useEffect(() => {
-        form.setValue("questions", table.getFilteredSelectedRowModel().flatRows.map((row) => row.original.id))
+        form && form.setValue("questions", table.getFilteredSelectedRowModel().flatRows.map((row) => row.original.id))
     }, [table.getFilteredSelectedRowModel().flatRows])
 
     return (

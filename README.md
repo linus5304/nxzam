@@ -31,3 +31,7 @@
     - [ ] Display metrics for the quiz
     - [ ] on the question tab in the quiz, display the questions the quiz, should be able to add, remove a question from the quiz
 - [ ] Add quiz filters
+
+### 05/02/2025
+
+- [ ] Add question to quiz on quiz creation and update

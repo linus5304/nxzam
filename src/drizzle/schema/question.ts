@@ -2,6 +2,7 @@ import { relations, sql } from "drizzle-orm";
 import { check, foreignKey, index, integer, jsonb, pgTable, text, uuid } from "drizzle-orm/pg-core";
 import { difficultyLevelEnum, ExamQuestionTable, PracticeQuestionTable, QuestionReviewTable, questionStatusEnum, SubjectTable, UserTable } from "../schema";
 import { createdAt, id, updatedAt } from "../schemaHelpers";
+import { QuizQuestionTable } from "./quiz-question";
 
 export const QuestionTable = pgTable("questions", {
     id,
@@ -47,4 +48,5 @@ export const questionsRelations = relations(QuestionTable, ({ one, many }) => ({
     questionReviews: many(QuestionReviewTable),
     practiceQuestions: many(PracticeQuestionTable),
     examQuestions: many(ExamQuestionTable),
+    quizQuestions: many(QuizQuestionTable),
 }));

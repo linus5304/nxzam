@@ -4,15 +4,26 @@ import { Difficulty, Status } from "@/lib/types"
 import { QuestionsFilterParams } from "@/features/questions/schemas/questions"
 import { and, eq } from "drizzle-orm"
 import { QuizTable } from "@/drizzle/schema/quiz"
+import { QuizQuestionTable } from "@/drizzle/schema/quiz-question"
 
 
-export async function createQuizDB(data: typeof QuizTable.$inferInsert) {
+export async function createQuizDB(data: typeof QuizTable.$inferInsert & { questionIds: string[] }) {
     try {
-        const [quiz] = await db
-            .insert(QuizTable)
-            .values(data)
-            .returning({ id: QuizTable.id, userId: QuizTable.createdBy })
-        return quiz
+        const newQuiz = await db.transaction(async (tx) => {
+            const [newQuiz] = await tx
+                .insert(QuizTable)
+                .values(data)
+                .returning({ id: QuizTable.id, userId: QuizTable.createdBy })
+
+            await tx.insert(QuizQuestionTable).values(data.questionIds.map((questionId) => ({
+                quizId: newQuiz.id,
+                questionId: questionId
+            })))
+
+            return newQuiz
+        })
+
+        return newQuiz
     } catch (error) {
         console.error(error)
         throw error

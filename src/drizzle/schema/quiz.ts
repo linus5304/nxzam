@@ -3,6 +3,7 @@ import { createdAt, id, updatedAt } from "../schemaHelpers";
 import { SubjectTable } from "./subject";
 import { UserTable } from "./user";
 import { relations } from "drizzle-orm";
+import { QuizQuestionTable } from "./quiz-question";
 
 export const QuizTable = pgTable('quiz_table', {
     id,
@@ -25,7 +26,7 @@ export const QuizTable = pgTable('quiz_table', {
     index("idx_quiz_created_by").using("btree", table.createdBy.asc().nullsLast().op("text_ops")),
 ]);
 
-export const QuizRelations = relations(QuizTable, ({ one }) => ({
+export const QuizRelations = relations(QuizTable, ({ one, many }) => ({
     subject: one(SubjectTable, {
         fields: [QuizTable.subjectId],
         references: [SubjectTable.id],
@@ -34,4 +35,5 @@ export const QuizRelations = relations(QuizTable, ({ one }) => ({
         fields: [QuizTable.createdBy],
         references: [UserTable.id],
     }),
+    questions: many(QuizQuestionTable),
 }));    

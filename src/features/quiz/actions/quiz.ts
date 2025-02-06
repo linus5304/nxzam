@@ -19,6 +19,7 @@ export async function create(unsafeData: z.infer<typeof quizSchema>) {
   await createQuizDB({
     ...data,
     createdBy: userId,
+    questionIds: data?.questions ?? []
   });
 
   return { error: false, message: "Quiz created successfully" }

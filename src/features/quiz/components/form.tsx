@@ -22,6 +22,8 @@ import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { quizSchema } from '../schemas/quiz'
+import { create, update } from '../actions/quiz'
+import { actionToast } from '@/hooks/use-toast'
 
 export function QuizForm({ subjects, children, quiz }: {
     subjects: {
@@ -48,10 +50,10 @@ export function QuizForm({ subjects, children, quiz }: {
     })
 
     async function onSubmit(values: z.infer<typeof quizSchema>) {
-        // const action = quiz == null ? create : update.bind(null, quiz.id)
-        // const data = await action(values)
-        // actionToast({ actionData: data })
         console.log(values)
+        const action = quiz == null ? create : update.bind(null, quiz.id)
+        const data = await action(values)
+        actionToast({ actionData: data })
     }
 
     return (
