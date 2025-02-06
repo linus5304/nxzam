@@ -1,19 +1,29 @@
-import { getQuestion } from "@/features/questions/actions/questions";
 import { getSubjects } from "@/features/subjects/actions/subjects";
-import { QuestionForm } from "@/features/questions/components/form";
+import { QuizForm } from "@/features/quiz/components/form";
+import QuestionsPage from "@/app/admin/quiz/[id]/questions/page";
+import { getQuiz } from "@/features/quiz/actions/quiz";
 import { notFound } from "next/navigation";
 
-type Params = Promise<{ id: string }>;
-
-export default async function EditQuestionPage({ params }: { params: Params }) {
-    const { id } = await params;
-    const subjects = await getSubjects();
-    const question = await getQuestion(id);
-    if (!question) {
-        return notFound();
+export default async function NewQuestionPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params
+    const subjects = await getSubjects()
+    const quiz = await getQuiz(id)
+    if (!quiz || quiz === null) {
+        return notFound()
     }
-
-    return <QuestionForm subjects={subjects} question={question} />
+    return (
+        <QuizForm subjects={subjects} quiz={{
+            id: quiz.id,
+            title: quiz.title,
+            description: quiz.description ?? undefined,
+            difficulty: quiz.difficulty as "easy" | "medium" | "hard",
+            durationMinutes: quiz.durationMinutes,
+            questionIds: quiz.questions.map((question) => question.questionId ?? ""),
+            subjectId: quiz.subjectId,
+            passingScore: quiz.passingScore,
+            totalQuestions: quiz.totalQuestions,
+        }}>
+            <QuestionsPage />
+        </QuizForm>
+    )
 }
-
-

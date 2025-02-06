@@ -45,7 +45,7 @@ export function QuizForm({ subjects, children, quiz }: {
             durationMinutes: 0,
             totalQuestions: 0,
             passingScore: 0,
-            questions: [],
+            questionIds: [],
         },
     })
 
@@ -150,7 +150,7 @@ export function QuizForm({ subjects, children, quiz }: {
                     <div>
                         <TextInput
                             label="Questions"
-                            name="questions"
+                            name="questionIds"
                             placeholder="Enter quiz questions"
                             hidden
                         />
@@ -161,10 +161,15 @@ export function QuizForm({ subjects, children, quiz }: {
 
 
                     <div className="flex justify-end">
-
-                        <Button type="submit" disabled={form.formState.isSubmitting} onClick={form.handleSubmit(onSubmit)}>
-                            {form.formState.isSubmitting ? "Creating..." : "Create Quiz"}
-                        </Button>
+                        {quiz == null ? (
+                            <Button type="submit" disabled={form.formState.isSubmitting} onClick={form.handleSubmit(onSubmit)}>
+                                {form.formState.isSubmitting ? "Creating..." : "Create Quiz"}
+                            </Button>
+                        ) : (
+                            <Button type="submit" disabled={form.formState.isSubmitting} onClick={form.handleSubmit(onSubmit)}>
+                                {form.formState.isSubmitting ? "Updating..." : "Update Quiz"}
+                            </Button>
+                        )}
                     </div>
                 </form>
                 <DevTool control={form.control} />

@@ -15,6 +15,11 @@ export async function createQuizDB(data: typeof QuizTable.$inferInsert & { quest
                 .values(data)
                 .returning({ id: QuizTable.id, userId: QuizTable.createdBy })
 
+            if (newQuiz == null) {
+                tx.rollback()
+                throw new Error("Failed to create quiz")
+            }
+
             await tx.insert(QuizQuestionTable).values(data.questionIds.map((questionId) => ({
                 quizId: newQuiz.id,
                 questionId: questionId
@@ -36,7 +41,31 @@ export async function getQuizListDB() {
 
 export async function getQuizDB(id: string) {
     return await db.query.QuizTable.findFirst({
+        columns: {
+            id: true,
+            title: true,
+            description: true,
+            difficulty: true,
+            durationMinutes: true,
+            passingScore: true,
+            totalQuestions: true,
+            subjectId: true,
+            createdBy: true,
+        },
         where: eq(QuizTable.id, id),
+        with: {
+            subject: {
+                columns: {
+                    id: true,
+                    name: true
+                }
+            },
+            questions: {
+                columns: {
+                    questionId: true,
+                }
+            }
+        }
     })
 }
 
@@ -70,12 +99,25 @@ export async function getQuestionsDB(filterParams: QuestionsFilterParams) {
     })[]
 }
 
-export async function updateQuestionDB(question: typeof QuestionTable.$inferInsert, { id, userId }: { id: string, userId: string }) {
-    const updatedQuestion = await db
-        .update(QuestionTable)
-        .set(question)
-        .where(and(eq(QuestionTable.id, id), eq(QuestionTable.createdBy, userId))).returning();
-    return updatedQuestion
+export async function updateDB(id: string, data: Partial<typeof QuizTable.$inferInsert> & { questionIds: string[] }) {
+    const { questionIds, ...rest } = data
+
+    const updatedQuiz = await db.transaction(async (tx) => {
+        const [updatedQuiz] = await tx.update(QuizTable).set(rest).where(and(eq(QuizTable.id, id))).returning();
+
+        if (updatedQuiz == null) {
+            tx.rollback()
+            throw new Error("Failed to update quiz")
+        }
+
+        await tx.delete(QuizQuestionTable).where(eq(QuizQuestionTable.quizId, id));
+        await tx.insert(QuizQuestionTable).values(questionIds.map((questionId) => ({
+            quizId: updatedQuiz.id,
+            questionId: questionId
+        })));
+        return updatedQuiz
+    })
+    return updatedQuiz
 }
 
 export async function deleteQuestionDB(id: string) {
