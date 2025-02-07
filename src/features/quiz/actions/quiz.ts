@@ -1,10 +1,10 @@
 'use server'
 
 import { auth } from '@clerk/nextjs/server'
-import { createQuizDB, deleteDB, getQuizDB, getQuizListDB, updateDB } from '../db/quiz'
-import { quizSchema } from '../schemas/quiz'
-import { z } from 'zod'
 import { redirect } from 'next/navigation'
+import { z } from 'zod'
+import { createQuizDB, deleteDB, getQuizAttemptListDB, getQuizDB, getQuizListDB, updateDB } from '../db/quiz'
+import { quizSchema } from '../schemas/quiz'
 
 export async function create(unsafeData: z.infer<typeof quizSchema>) {
   const { success, data } = quizSchema.safeParse(unsafeData)
@@ -51,6 +51,11 @@ export async function getQuiz(id: string) {
 export async function getQuizList() {
   const quizzes = await getQuizListDB()
   return quizzes
+}
+
+export async function getQuizAttemptList(quizId: string) {
+  const quizAttemptList = await getQuizAttemptListDB(quizId)
+  return quizAttemptList
 }
 
 export async function deleteQuiz(id: string) {

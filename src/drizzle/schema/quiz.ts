@@ -4,6 +4,7 @@ import { SubjectTable } from "./subject";
 import { UserTable } from "./user";
 import { relations } from "drizzle-orm";
 import { QuizQuestionTable } from "./quiz-question";
+import { QuizAttemptTable } from "./quiz-attempts";
 
 export const QuizTable = pgTable('quiz_table', {
     id,
@@ -35,5 +36,6 @@ export const QuizRelations = relations(QuizTable, ({ one, many }) => ({
         fields: [QuizTable.createdBy],
         references: [UserTable.id],
     }),
-    questions: many(QuizQuestionTable),
+    quizQuestions: many(QuizQuestionTable),
+    quizAttempts: many(QuizAttemptTable),
 }));    

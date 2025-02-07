@@ -12,3 +12,4 @@ export * from "./schema/subject";
 export * from "./schema/user";
 export * from "./schema/quiz";
 export * from "./schema/quiz-question";
+export * from "./schema/quiz-attempts";

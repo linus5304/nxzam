@@ -1,5 +1,5 @@
 import { db } from "@/drizzle/db"
-import { QuestionTable, SubjectTable } from "@/drizzle/schema"
+import { QuestionTable, QuizAttemptTable, SubjectTable } from "@/drizzle/schema"
 import { Difficulty, Status } from "@/lib/types"
 import { QuestionsFilterParams } from "@/features/questions/schemas/questions"
 import { and, eq } from "drizzle-orm"
@@ -71,43 +71,30 @@ export async function getQuizDB(id: string) {
                     name: true
                 }
             },
-            questions: {
+            quizQuestions: {
                 columns: {
                     questionId: true,
+                },
+                with: {
+                    question: {
+                        columns: {
+                            id: true,
+                            questionText: true,
+                            options: true,
+                            explanation: true,
+                            correctAnswer: true,
+                        }
+                    }
                 }
             }
         }
     })
 }
 
-export async function getQuestionsDB(filterParams: QuestionsFilterParams) {
-    const questions = await db.query.QuestionTable.findMany({
-        where: (question, { eq, ilike }) => {
-            if (filterParams.query) {
-                return ilike(question.questionText, `%${filterParams.query}%`)
-            }
-            if (filterParams.subjectId) {
-                return eq(question.subjectId, filterParams.subjectId)
-            }
-            if (filterParams.difficulty) {
-                return eq(question.difficulty, filterParams.difficulty as Difficulty)
-            }
-            if (filterParams.status) {
-                return eq(question.status, filterParams.status as Status)
-            }
-        },
-        with: {
-            subject: {
-                columns: {
-                    id: true,
-                    name: true
-                }
-            }
-        }
+export async function getQuizAttemptListDB(quizId: string) {
+    return await db.query.QuizAttemptTable.findMany({
+        where: eq(QuizAttemptTable.quizId, quizId),
     })
-    return questions as (typeof QuestionTable.$inferSelect & {
-        subject: Pick<typeof SubjectTable.$inferSelect, 'id' | 'name'>
-    })[]
 }
 
 export async function updateDB(id: string, data: Partial<typeof QuizTable.$inferInsert> & { questionIds: string[] }) {

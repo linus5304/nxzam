@@ -1,13 +1,9 @@
-import { DynamicBreadcrumb } from "@/components/dynamic-breadcrumb";
-import { Separator } from "@/components/ui/separator";
 import { Icons } from "@/lib/icons";
-import { QuizSidebar } from "@/app/admin/_components/sidebar/quiz-sidebar";
-import { QuestionsSidebar } from "@/app/admin/_components/sidebar/question-sidebar";
-import Link from "next/link";
-import { AppSidebar } from "../_components/sidebar";
-import { getCurrentUser } from "@/services/clerk";
 import { canAccessAdminPages } from "@/permissions/general";
+import { getCurrentUser } from "@/services/clerk";
 import { UserButton } from "@clerk/nextjs";
+import Link from "next/link";
+import { Sidebar } from "../_components/sidebar";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     return (
@@ -15,9 +11,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <Navbar />
             <div className="container mx-auto p-4 md:p-6 lg:p-8 grid grid-cols-12 gap-4">
                 <div className="col-span-12 md:col-span-3 lg:col-span-2">
-                    <AppSidebar />
-                    <QuizSidebar />
-                    <QuestionsSidebar />
+                    <Sidebar />
                 </div>
                 <div className="col-span-12 md:col-span-9 lg:col-span-10">
                     {children}

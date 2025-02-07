@@ -49,7 +49,7 @@ export async function POST(req: Request) {
                     clerkUserId: event.data.id,
                     email: email,
                     fullName: fullName,
-                    role: "user",
+                    role: "admin",
                     imageUrl: event.data.image_url,
                 })
 

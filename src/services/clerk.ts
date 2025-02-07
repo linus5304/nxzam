@@ -37,7 +37,7 @@ export function syncClerkUserMetadata(user: {
 }
 
 export async function getUser(id: string) {
-    "use cache"
+    // "use cache"
     return db.query.UserTable.findFirst({
         where: eq(UserTable.id, id)
     })
