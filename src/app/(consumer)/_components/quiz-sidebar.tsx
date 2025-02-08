@@ -12,25 +12,25 @@ export function QuizSidebar() {
         return null
     }
     return (
-        <div>
+        <div className="container mx-auto p-4 md:p-6 lg:p-8">
             <div className="flex flex-col gap-2">
-                <Link href={`/dashboard/quiz/${id}`}>
+                {/* <Link href={`/dashboard/quiz/${id}`}>
                     <div className={cn("flex items-center gap-2 hover:bg-muted p-2 rounded-md animate-in fade-in-0 duration-300 transition-colors", {
                         "bg-muted": pathname === `/dashboard/quiz/${id}`
                     })}>
                         <BookAIcon size={16} />
                         <span>Overview</span>
                     </div>
-                </Link>
+                </Link> */}
 
-                <Link href={`/dashboard/quiz/${id}/settings`}>
+                {/* <Link href={`/dashboard/quiz/${id}/settings`}>
                     <div className={cn("flex items-center gap-2 hover:bg-muted p-2 rounded-md animate-in fade-in-0 duration-300 transition-colors", {
                         "bg-muted": pathname === `/dashboard/quiz/${id}/settings`
                     })}>
                         <SettingsIcon size={16} />
                         <span>Settings</span>
                     </div>
-                </Link>
+                </Link> */}
             </div>
         </div>
     )

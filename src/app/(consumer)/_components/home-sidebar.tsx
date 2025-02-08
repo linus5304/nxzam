@@ -13,7 +13,7 @@ export function AppSidebar() {
     }
 
     return (
-        <div>
+        <div className="col-span-12 md:col-span-3 lg:col-span-2">
             <div className="flex flex-col gap-2">
                 <Link href="/dashboard">
                     <div className={cn("flex items-center gap-2 hover:bg-muted p-2 rounded-md animate-in fade-in-0 duration-300 transition-colors", {

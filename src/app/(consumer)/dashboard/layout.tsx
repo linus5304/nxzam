@@ -10,9 +10,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <>
             <Navbar />
             <div className="container mx-auto p-4 md:p-6 lg:p-8 grid grid-cols-12 gap-4">
-                <div className="col-span-12 md:col-span-3 lg:col-span-2">
-                    <Sidebar />
-                </div>
+                <Sidebar />
                 <div className="col-span-12 md:col-span-9 lg:col-span-10">
                     {children}
                 </div>
