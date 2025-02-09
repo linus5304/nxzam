@@ -34,7 +34,7 @@ export const QuizRelations = relations(QuizTable, ({ one, many }) => ({
     }),
     createdBy: one(UserTable, {
         fields: [QuizTable.createdBy],
-        references: [UserTable.id],
+        references: [UserTable.clerkUserId],
     }),
     quizQuestions: many(QuizQuestionTable),
     quizAttempts: many(QuizAttemptTable),

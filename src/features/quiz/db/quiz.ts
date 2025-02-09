@@ -61,7 +61,6 @@ export async function getQuizDB(id: string) {
             passingScore: true,
             totalQuestions: true,
             subjectId: true,
-            createdBy: true,
         },
         where: eq(QuizTable.id, id),
         with: {
@@ -69,6 +68,13 @@ export async function getQuizDB(id: string) {
                 columns: {
                     id: true,
                     name: true
+                }
+            },
+            createdBy: {
+                columns: {
+                    id: true,
+                    fullName: true,
+                    imageUrl: true
                 }
             },
             quizQuestions: {
