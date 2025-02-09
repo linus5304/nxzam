@@ -5,8 +5,8 @@ import { createdAt, id, updatedAt } from "../schemaHelpers";
 
 export const QuizAttemptTable = pgTable("quiz_attempts", {
     id,
-    quizId: uuid("quiz_id").notNull().references(() => QuizTable.id),
-    userId: uuid("user_id").notNull().references(() => UserTable.id),
+    quizId: uuid("quiz_id").notNull().references(() => QuizTable.id, { onDelete: 'cascade' }),
+    userId: uuid("user_id").notNull().references(() => UserTable.id, { onDelete: 'cascade' }),
     startedAt: timestamp("started_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
     completedAt: timestamp("completed_at", { withTimezone: true, mode: 'string' }),
     score: integer(),
@@ -21,7 +21,6 @@ export const QuizAttemptTable = pgTable("quiz_attempts", {
     createdAt,
     updatedAt,
 }, (table) => [
-
 ]);
 
 export const quizAttemptsRelations = relations(QuizAttemptTable, ({ one }) => ({

@@ -20,7 +20,7 @@ export const parseQuestion = (dbQuestion: DBQuestion):
             name: dbQuestion.subject.name
         },
         questionText: dbQuestion.questionText,
-        options: dbQuestion.options as string[],
+        options: dbQuestion.options,
         difficulty: dbQuestion.difficulty,
         status: dbQuestion.status as Status,
         correctAnswer: dbQuestion.correctAnswer,

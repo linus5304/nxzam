@@ -106,6 +106,8 @@ export async function getQuizAttemptListDB(quizId: string) {
 export async function updateDB(id: string, data: Partial<typeof QuizTable.$inferInsert> & { questionIds: string[] }) {
     const { questionIds, ...rest } = data
 
+    console.log("questionIds", questionIds)
+
     const updatedQuiz = await db.transaction(async (tx) => {
         const [updatedQuiz] = await tx.update(QuizTable).set(rest).where(and(eq(QuizTable.id, id))).returning();
 

@@ -18,7 +18,7 @@ export default async function NewQuestionPage({ params }: { params: Promise<{ id
             description: quiz.description ?? undefined,
             difficulty: quiz.difficulty as "easy" | "medium" | "hard",
             durationMinutes: quiz.durationMinutes,
-            questionIds: quiz.questions.map((question) => question.questionId ?? ""),
+            questionIds: quiz.quizQuestions.map((question) => question.questionId ?? ""),
             subjectId: quiz.subjectId,
             passingScore: quiz.passingScore,
             totalQuestions: quiz.totalQuestions,

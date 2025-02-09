@@ -25,7 +25,7 @@ async function Navbar() {
             <div className="flex justify-between w-full">
                 <div className="flex items-center gap-2 px-4">
                     <Link href="/dashboard">
-                        <Icons.LogoDark size={140} />
+                        <Icons.LogoDark className="w-50 h-50" />
                     </Link>
                 </div>
                 <div className="flex gap-2 px-4 items-center">

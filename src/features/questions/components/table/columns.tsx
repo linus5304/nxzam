@@ -81,7 +81,7 @@ export const columns: ColumnDef<QuestionType>[] = [
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <Link href={`/dashboard/questions/${question.id}/edit`}>
+                        <Link href={`/admin/questions/${question.id}/edit`}>
                             <DropdownMenuItem>
                                 Edit
                             </DropdownMenuItem>

@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/form"
 import { useFormContext } from "react-hook-form"
 import { cn } from "@/lib/utils"
+import { Textarea } from "../ui/textarea"
 
 interface TextInputProps {
     label: string
@@ -40,6 +41,41 @@ export function TextInput({
                     <FormLabel>{label}</FormLabel>
                     <FormControl>
                         <Input
+                            placeholder={placeholder}
+                            {...field}
+                            className={cn(className, hidden && "hidden")}
+                        />
+                    </FormControl>
+                    {description && (
+                        <FormDescription>{description}</FormDescription>
+                    )}
+                    <FormMessage />
+                </FormItem>
+            )}
+        />
+    )
+}
+
+export function TextareaInput({
+    label,
+    name,
+    placeholder,
+    description,
+    required = false,
+    className = "",
+    hidden = false
+}: TextInputProps) {
+    const form = useFormContext()
+
+    return (
+        <FormField
+            control={form.control}
+            name={name}
+            render={({ field }) => (
+                <FormItem>
+                    <FormLabel>{label}</FormLabel>
+                    <FormControl>
+                        <Textarea
                             placeholder={placeholder}
                             {...field}
                             className={cn(className, hidden && "hidden")}

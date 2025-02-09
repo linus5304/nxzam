@@ -10,7 +10,11 @@ export const QuestionTable = pgTable("questions", {
     createdBy: uuid("created_by").notNull(),
     questionText: text("question_text").notNull(),
     explanation: text(),
-    options: jsonb().notNull(),
+    options: jsonb().$type<{
+        id: string;
+        text: string;
+        isCorrect: boolean;
+    }[]>().notNull(),
     correctAnswer: integer("correct_answer").notNull(),
     difficulty: difficultyLevelEnum().default('medium').notNull(),
     status: questionStatusEnum().default('draft').notNull(),

@@ -1,4 +1,5 @@
 import { getQuiz } from "@/features/quiz/actions/quiz"
+import { QuizQuestionView } from "@/features/quiz/components/quiz-question-view"
 import { notFound } from "next/navigation"
 
 
@@ -12,13 +13,11 @@ export default async function page({ params }: { params: Promise<{ id: string }>
     console.log(questions)
     return (
         <div>
-            <h1>Quiz Attempt</h1>
-            {questions.map((question) => (
-                <div key={question?.id}>
-                    <h2>{question?.questionText}</h2>
-                    <div>{JSON.stringify(question?.options)}</div>
-                </div>
-            ))}
+            <QuizQuestionView questions={questions.map((question) => ({
+                id: question.id,
+                questionText: question.questionText,
+                options: question.options,
+            }))} />
         </div>
     )
 }

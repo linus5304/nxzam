@@ -1,7 +1,11 @@
 'use client'
 
+import { SelectInput } from '@/components/form/select-input'
+import { TagInput } from '@/components/form/tag-input'
+import { TextareaInput } from '@/components/form/text-input'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
     Form,
     FormControl,
@@ -12,68 +16,60 @@ import {
     FormMessage
 } from "@/components/ui/form"
 import { Input } from '@/components/ui/input'
-import { NumberInput } from "@/components/form/number-input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { QuestionFormData, questionFormSchema } from '@/features/questions/schemas/questions'
+import { difficultyLevels, statuses } from '@/data/data'
 import { createQuestion, updateQuestion } from '@/features/questions/actions/questions'
+import { questionFormSchema } from '@/features/questions/schemas/questions'
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from 'react-hook-form'
+import { Trash2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useFieldArray, useForm, useFormContext } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
-import { useRouter } from 'next/navigation'
-interface QuestionFormProps {
-    subjects: { id: string, name: string, examType: "gce_ol" | "gce_al" }[]
-    id?: string
-    question?: QuestionFormData & { id: string }
-}
 
-const initialState: QuestionFormData = {
+const initialState: z.infer<typeof questionFormSchema> = {
     subjectId: '',
     questionText: '',
     explanation: '',
-    options: ['', '', '', ''],
+    options: [
+        { id: crypto.randomUUID(), text: '', isCorrect: false },
+        { id: crypto.randomUUID(), text: '', isCorrect: false },
+        { id: crypto.randomUUID(), text: '', isCorrect: false },
+        { id: crypto.randomUUID(), text: '', isCorrect: false },
+    ],
     correctAnswer: 0,
     difficulty: 'medium',
     status: 'draft',
-    tags: [''],
+    tags: [],
     metadata: '',
 }
 
 
-export function QuestionForm({ subjects, question }: QuestionFormProps) {
+export function QuestionForm({ subjects, question }: {
+    subjects: { id: string, name: string, examType: "gce_ol" | "gce_al" }[]
+    question?: z.infer<typeof questionFormSchema> & { id: string }
+}) {
     const router = useRouter()
     const form = useForm<z.infer<typeof questionFormSchema>>({
         resolver: zodResolver(questionFormSchema),
         defaultValues: question ?? initialState,
     })
 
+    const { fields, append, remove } = useFieldArray({
+        control: form.control,
+        name: 'options' as never
+    })
+
     async function onSubmit(values: z.infer<typeof questionFormSchema>) {
         const action = question == null ? createQuestion : updateQuestion.bind(null, question.id)
         const data = await action(values)
-        console.log(data)
         if (data.error) {
             toast.error(data.message)
         } else {
             toast.success(data.message)
-            !question ? form.reset(initialState) : router.push(`/dashboard/questions`)
+            !question ? form.reset(initialState) : router.push(`/admin/questions`)
         }
-    }
-
-    const tags = form.watch('tags')
-
-    const addTag = () => {
-        const newTags = [...tags, '']
-        form.setValue('tags', newTags)
-    }
-    const removeTag = (index: number) => {
-        const newTags = tags.filter((_, i) => i !== index)
-        form.setValue('tags', newTags)
-    }
-    const updateTag = (index: number, value: string) => {
-        const newTags = [...tags]
-        newTags[index] = value
-        form.setValue('tags', newTags)
     }
 
     return (
@@ -84,162 +80,83 @@ export function QuestionForm({ subjects, question }: QuestionFormProps) {
             <CardContent>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                        <FormField
-                            control={form.control}
+                        <SelectInput
+                            label="Subject"
                             name="subjectId"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel htmlFor="subjectId">Subject</FormLabel>
-                                    <Select name="subjectId" onValueChange={field.onChange} defaultValue={field.value}>
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select a subject" />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            {subjects.map((subject) => (
-                                                <SelectItem key={subject.id} value={subject.id}>
-                                                    {subject.name} ({subject.examType})
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
+                            options={subjects.map(subject => ({
+                                id: subject.id,
+                                label: `${subject.name} (${subject.examType})`,
+                                value: subject.id
+                            }))} />
+                        <TextareaInput
+                            label="Question Text"
                             name="questionText"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Question Text</FormLabel>
-                                    <Textarea placeholder="Enter the question text" {...field} />
-                                    <FormMessage />
-                                </FormItem>
-                            )}
+                            placeholder="Enter question text"
                         />
-                        <FormField
-                            control={form.control}
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                                <Label>Options</Label>
+                                {fields.length < 6 && ( // Limit to max 6 options
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => append({
+                                            id: crypto.randomUUID(),
+                                            text: '',
+                                            isCorrect: false
+                                        })}
+                                    >
+                                        Add Option
+                                    </Button>
+                                )}
+                            </div>
+
+                            <div className="space-y-3">
+                                {fields.map((field, index) => (
+                                    <QuestionOptionField
+                                        key={field.id}
+                                        index={index}
+                                        remove={() => remove(index)}
+                                        optionsLength={fields.length}
+                                    />
+                                ))}
+                            </div>
+
+                            {form.formState.errors.options && (
+                                <p className="text-sm text-destructive">
+                                    {form.formState.errors.options.message}
+                                </p>
+                            )}
+                        </div>
+                        <TextareaInput
+                            label="Explanation"
                             name="explanation"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Explanation (Optional)</FormLabel>
-                                    <Textarea placeholder="Enter an explanation for the correct answer" {...field} />
-                                    <FormMessage />
-                                </FormItem>
-                            )}
+                            placeholder="Enter explanation"
                         />
-                        <FormField
-                            control={form.control}
-                            name="options"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Options</FormLabel>
-                                    {field.value.map((option, index) => (
-                                        <div key={index} className="flex items-center space-x-2">
-                                            <Input
-                                                value={option}
-                                                onChange={(e) => {
-                                                    const newOptions = [...field.value]
-                                                    newOptions[index] = e.target.value
-                                                    form.setValue('options', newOptions)
-                                                }}
-                                                placeholder={`Option ${index + 1}`}
-                                            />
-                                        </div>
-                                    ))}
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="correctAnswer"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Correct Answer</FormLabel>
-                                    <FormControl>
-                                        <NumberInput
-                                            label="Passing Score"
-                                            name="passingScore"
-                                            min={1}
-                                            max={100}
-                                            allowDecimals={false}
-                                            defaultValue={field.value}
-                                        />
-                                    </FormControl>
-                                    <FormDescription>
-                                        Enter a number between 0 and {form.getValues('options').length - 1} to select the correct option
-                                    </FormDescription>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
-                        <FormField
-                            control={form.control}
+                        <SelectInput
+                            label="Difficulty"
                             name="difficulty"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Difficulty</FormLabel>
-                                    <Select name="difficulty" onValueChange={field.onChange} defaultValue={field.value}>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select difficulty" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="easy">Easy</SelectItem>
-                                            <SelectItem value="medium">Medium</SelectItem>
-                                            <SelectItem value="hard">Hard</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+                            options={difficultyLevels.map(difficulty => ({
+                                id: difficulty.id,
+                                label: difficulty.label,
+                                value: difficulty.value
+                            }))} />
 
-                        <FormField
-                            control={form.control}
+                        <SelectInput
+                            label="Status"
                             name="status"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Status</FormLabel>
-                                    <Select name="status" onValueChange={field.onChange} defaultValue={field.value}>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select status" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="draft">Draft</SelectItem>
-                                            <SelectItem value="published">Published</SelectItem>
-                                            <SelectItem value="archived">Archived</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+                            options={statuses.map(status => ({
+                                id: status.id,
+                                label: status.label,
+                                value: status.value
+                            }))} />
 
-                        <FormField
-                            control={form.control}
+                        <TagInput
+                            label="Tags"
                             name="tags"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Tags</FormLabel>
-                                    {tags.map((tag, index) => (
-                                        <div key={index} className="flex items-center space-x-2">
-                                            <Input
-                                                value={tag}
-                                                onChange={(e) => updateTag(index, e.target.value)}
-                                                placeholder={`Tag ${index + 1}`}
-                                            />
-                                            <Button type="button" variant="outline" onClick={() => removeTag(index)}>
-                                                Remove
-                                            </Button>
-                                        </div>
-                                    ))}
-                                    <Button type="button" onClick={addTag}>Add Tag</Button>
-                                </FormItem>
-                            )}
+                            placeholder="Type a tag and press Enter"
+                            description="Press Enter or comma to add a tag"
                         />
                         <FormField
                             control={form.control}
@@ -262,3 +179,74 @@ export function QuestionForm({ subjects, question }: QuestionFormProps) {
         </Card>
     )
 }
+
+
+
+const QuestionOptionField = ({
+    index,
+    remove,
+    optionsLength
+}: {
+    index: number,
+    remove: () => void,
+    optionsLength: number
+}) => {
+    const form = useFormContext();
+
+    return (
+        <div className="flex items-center gap-3">
+            <div className="flex-1">
+                <Input
+                    {...form.register(`options.${index}.text`)}
+                    placeholder={`Option ${index + 1}`}
+                />
+            </div>
+
+            <div className="flex items-center gap-2">
+                <FormField
+                    control={form.control}
+                    name={`options.${index}.isCorrect`}
+                    render={({ field }) => (
+                        <FormItem className="flex items-center space-x-2 space-y-0">
+                            <FormControl>
+                                <Checkbox
+                                    checked={field.value}
+                                    onCheckedChange={(checked) => {
+                                        // If this option is being marked as correct,
+                                        // unmark other options
+                                        if (checked) {
+                                            const options = form.getValues('options');
+                                            options.forEach((_: any, i: number) => {
+                                                if (i !== index) {
+                                                    form.setValue(
+                                                        `options.${i}.isCorrect`,
+                                                        false
+                                                    );
+                                                }
+                                            });
+                                        }
+                                        field.onChange(checked);
+                                    }}
+                                />
+                            </FormControl>
+                            <FormLabel className="text-sm font-normal">
+                                Correct Answer
+                            </FormLabel>
+                        </FormItem>
+                    )}
+                />
+
+                {optionsLength > 2 && ( // Prevent removing if only 2 options left
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={remove}
+                    >
+                        <Trash2 className="h-4 w-4" />
+                    </Button>
+                )}
+            </div>
+        </div>
+    );
+};

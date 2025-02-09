@@ -28,22 +28,22 @@ import Link from "next/link"
 import { useFormContext } from "react-hook-form"
 import { QuestionType } from "../../schemas/questions"
 
-interface DataTableProps<TData, TValue> {
-    columns: ColumnDef<TData, TValue>[]
-    data: TData[]
+interface DataTableProps {
+    columns: ColumnDef<QuestionType>[]
+    data: QuestionType[]
 }
 
-export function DataTable<TData, TValue>({
+export function DataTable({
     columns,
     data,
-}: DataTableProps<TData, TValue>) {
+}: DataTableProps) {
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const [rowSelection, setRowSelection] = useState({});
 
     const table = useReactTable<QuestionType>({
-        data: data as QuestionType[],
-        columns: columns as ColumnDef<QuestionType>[],
+        data,
+        columns,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
         onSortingChange: setSorting,
@@ -60,8 +60,28 @@ export function DataTable<TData, TValue>({
 
     const form = useFormContext()
     useEffect(() => {
-        form && form.setValue("questionIds", table.getFilteredSelectedRowModel().flatRows.map((row) => row.original.id))
-    }, [table.getFilteredSelectedRowModel().flatRows])
+        const questionIds = form.getValues("questionIds") as string[]
+        console.log("questionIds", questionIds)
+        if (questionIds.length > 0) {
+            const newRowSelection = data.reduce((acc, row, index) => {
+                if (questionIds.includes(row.id)) {
+                    acc[index] = true
+                }
+                return acc
+            }, {} as Record<number, boolean>)
+            setRowSelection(newRowSelection)
+        }
+    }, [data])
+
+    useEffect(() => {
+        if (form) {
+            const selectedQuestions = table.getSelectedRowModel().flatRows.map(row => row.original.id)
+            form.setValue("questionIds", selectedQuestions, {
+                shouldDirty: true,
+                shouldValidate: true,
+            })
+        }
+    }, [rowSelection])
 
     return (
         <>

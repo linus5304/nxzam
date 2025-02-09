@@ -1,9 +1,9 @@
 "use client"
 
-import { usePathname, useSelectedLayoutSegments } from "next/navigation"
+import { QuestionsSidebar } from "@/app/admin/_components/sidebar/question-sidebar"
+import { useSelectedLayoutSegments } from "next/navigation"
 import { AppSidebar } from "./home-sidebar"
 import { QuizSidebar } from "./quiz-sidebar"
-import { QuestionsSidebar } from "@/app/admin/_components/sidebar/question-sidebar"
 
 export function Sidebar() {
     const segments = useSelectedLayoutSegments()

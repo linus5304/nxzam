@@ -24,6 +24,8 @@ import { z } from 'zod'
 import { quizSchema } from '../schemas/quiz'
 import { create, update } from '../actions/quiz'
 import { actionToast } from '@/hooks/use-toast'
+import { useEffect } from 'react'
+import { difficultyLevels } from '@/data/data'
 
 export function QuizForm({ subjects, children, quiz }: {
     subjects: {
@@ -92,19 +94,11 @@ export function QuizForm({ subjects, children, quiz }: {
 
                     <div className="grid sm:grid-cols-12 grid-cols-6 gap-4">
                         <div className="col-span-3">
-                            <SelectInput label="Difficulty" name="difficulty" options={[{
-                                id: "easy",
-                                label: "Easy",
-                                value: "easy"
-                            }, {
-                                id: "medium",
-                                label: "Medium",
-                                value: "medium"
-                            }, {
-                                id: "hard",
-                                label: "Hard",
-                                value: "hard"
-                            }]} />
+                            <SelectInput label="Difficulty" name="difficulty" options={difficultyLevels.map(difficulty => ({
+                                id: difficulty.id,
+                                label: difficulty.label,
+                                value: difficulty.value
+                            }))} />
                         </div>
 
                         <div className="col-span-3">
