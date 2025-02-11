@@ -12,6 +12,8 @@ import {
     useReactTable,
 } from "@tanstack/react-table"
 
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import {
     Table,
     TableBody,
@@ -20,26 +22,30 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
-import { useEffect, useState } from "react"
-import { Input } from "@/components/ui/input"
 import { DataTablePagination } from "@/features/questions/components/table/pagination"
 import Link from "next/link"
-import { useFormContext } from "react-hook-form"
+import { useEffect, useState } from "react"
 import { QuestionType } from "../../schemas/questions"
+import { useFormContext } from "react-hook-form"
 
 interface DataTableProps {
     columns: ColumnDef<QuestionType>[]
     data: QuestionType[]
+    embedded?: boolean
 }
 
 export function DataTable({
     columns,
     data,
+    embedded = false,
 }: DataTableProps) {
+    "use no memo"
+
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-    const [rowSelection, setRowSelection] = useState({});
+    const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
+
+    const form = useFormContext()
 
     const table = useReactTable<QuestionType>({
         data,
@@ -50,38 +56,24 @@ export function DataTable({
         getSortedRowModel: getSortedRowModel(),
         onColumnFiltersChange: setColumnFilters,
         getFilteredRowModel: getFilteredRowModel(),
-        onRowSelectionChange: setRowSelection,
+        onRowSelectionChange: (updateOrValue) => {
+            const newRowSelection = typeof updateOrValue === 'function' ? updateOrValue(rowSelection) : updateOrValue
+            setRowSelection(newRowSelection)
+            const selectedQuestionsIds = Object.keys(newRowSelection)
+                .filter(key => newRowSelection[key])
+                .map(key => data[parseInt(key)].id)
+            form.setValue("questionIds", selectedQuestionsIds, {
+                shouldDirty: true,
+                shouldTouch: true,
+            })
+        },
+        enableRowSelection: true,
         state: {
             sorting,
             columnFilters,
             rowSelection,
         },
     })
-
-    const form = useFormContext()
-    useEffect(() => {
-        const questionIds = form.getValues("questionIds") as string[]
-        console.log("questionIds", questionIds)
-        if (questionIds.length > 0) {
-            const newRowSelection = data.reduce((acc, row, index) => {
-                if (questionIds.includes(row.id)) {
-                    acc[index] = true
-                }
-                return acc
-            }, {} as Record<number, boolean>)
-            setRowSelection(newRowSelection)
-        }
-    }, [data])
-
-    useEffect(() => {
-        if (form) {
-            const selectedQuestions = table.getSelectedRowModel().flatRows.map(row => row.original.id)
-            form.setValue("questionIds", selectedQuestions, {
-                shouldDirty: true,
-                shouldValidate: true,
-            })
-        }
-    }, [rowSelection])
 
     return (
         <>
@@ -94,11 +86,13 @@ export function DataTable({
                     }
                     className="max-w-sm"
                 />
-                <Button asChild className="ml-auto">
-                    <Link href="/admin/questions/new">
-                        Create Question
-                    </Link>
-                </Button>
+                {!embedded && (
+                    <Button asChild className="ml-auto">
+                        <Link href="/admin/questions/new">
+                            Create Question
+                        </Link>
+                    </Button>
+                )}
             </div>
             <div className="rounded-md border mb-4">
                 <Table>

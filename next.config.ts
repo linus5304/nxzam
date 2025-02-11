@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
     useCache: true,
     // dynamicIO: true,
     // authInterrupts: true,
+    reactCompiler: true,
   },
 };
 

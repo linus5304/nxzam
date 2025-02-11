@@ -10,10 +10,15 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import { cn } from "@/lib/utils"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { Flag, MenuSquare } from "lucide-react"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
+import { QuizResults } from "./quiz-results"
+import { QuizQuestionDisplay } from "./quiz-question-display"
 
 
 const questionViewSchema = z.object({
@@ -43,6 +48,7 @@ export function QuizQuestionView({ questions }: {
 }) {
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
     const [answers, setAnswers] = useState<Record<string, string>>({})
+    const [flaggedQuestions, setFlaggedQuestions] = useState<Set<number>>(new Set())
     const [isCompleted, setIsCompleted] = useState(false)
 
     const form = useForm<z.infer<typeof questionViewSchema>>({
@@ -70,6 +76,20 @@ export function QuizQuestionView({ questions }: {
         }
     }
 
+    const handleToggleFlag = (index: number) => {
+        setFlaggedQuestions(prev => {
+            const next = new Set(prev)
+            if (next.has(index)) {
+                next.delete(index)
+            } else {
+                next.add(index)
+            }
+            return next
+        })
+    }
+
+    const answeredQuestions = new Set(Object.keys(answers))
+
     if (isCompleted) {
         return <QuizResults questions={questions} answers={answers} />
     }
@@ -78,10 +98,35 @@ export function QuizQuestionView({ questions }: {
 
     return (
         <div className="w-full mx-auto max-w-2xl">
-            <QuizProgress
-                current={currentQuestionIndex + 1}
-                total={questions.length}
+            <QuizNavigationDrawer
+                totalQuestions={questions.length}
+                currentQuestion={currentQuestionIndex}
+                flaggedQuestions={flaggedQuestions}
+                answeredQuestions={answeredQuestions}
+                onQuestionSelect={setCurrentQuestionIndex}
+                questions={questions}
             />
+
+            <div className="flex justify-between items-start mb-6">
+                <h2 className="font-medium">Question {currentQuestionIndex + 1}</h2>
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    className={cn(
+                        "gap-2",
+                        flaggedQuestions.has(currentQuestionIndex) && "text-destructive"
+                    )}
+                    onClick={() => handleToggleFlag(currentQuestionIndex)}
+                >
+                    <Flag
+                        className={cn(
+                            "h-4 w-4",
+                            flaggedQuestions.has(currentQuestionIndex) && "fill-destructive"
+                        )}
+                    />
+                    {flaggedQuestions.has(currentQuestionIndex) ? 'Unflag' : 'Flag for later'}
+                </Button>
+            </div>
 
             <Form {...form}>
                 <form className="flex flex-col gap-4">
@@ -90,31 +135,14 @@ export function QuizQuestionView({ questions }: {
                         control={form.control}
                         name={`questions.${currentQuestionIndex}`}
                         render={({ field }) => (
-                            <FormItem className="space-y-3">
-                                <FormLabel>{currentQuestion.questionText}</FormLabel>
-                                <FormControl>
-                                    <RadioGroup
-                                        onValueChange={(value) => {
-                                            field.onChange(value)
-                                            handleAnswer(currentQuestion.id, value)
-                                        }}
-                                        value={answers[currentQuestion.id]}
-                                        className="flex flex-col space-y-1"
-                                    >
-                                        {currentQuestion.options.map((option) => (
-                                            <FormItem key={option.id} className="flex items-center space-x-3 space-y-0">
-                                                <FormControl>
-                                                    <RadioGroupItem value={option.id} className="peer sr-only" />
-                                                </FormControl>
-                                                <FormLabel className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-transparent p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer min-w-80">
-                                                    {option.text}
-                                                </FormLabel>
-                                            </FormItem>
-                                        ))}
-                                    </RadioGroup>
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
+                            <QuizQuestionDisplay
+                                question={currentQuestion}
+                                selectedOptionId={answers[currentQuestion.id]}
+                                onOptionSelect={(value) => {
+                                    field.onChange(value)
+                                    handleAnswer(currentQuestion.id, value)
+                                }}
+                            />
                         )}
                     />
 
@@ -141,6 +169,94 @@ export function QuizQuestionView({ questions }: {
     )
 }
 
+
+interface QuizNavigationDrawerProps {
+    totalQuestions: number
+    currentQuestion: number
+    flaggedQuestions: Set<number>
+    answeredQuestions: Set<string>
+    onQuestionSelect: (index: number) => void
+    questions: { id: string }[]
+}
+
+export function QuizNavigationDrawer({
+    totalQuestions,
+    currentQuestion,
+    flaggedQuestions,
+    answeredQuestions,
+    onQuestionSelect,
+    questions
+}: QuizNavigationDrawerProps) {
+    return (
+        <Sheet key="bottom">
+            <SheetTrigger asChild>
+                <Button variant="outline" size="icon" className="fixed bottom-4 left-4">
+                    <MenuSquare className="h-5 w-5" />
+                </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-[300px]">
+                <SheetHeader>
+                    <SheetTitle className="text-md font-medium">Questions List</SheetTitle>
+                </SheetHeader>
+                <div className="grid grid-cols-6 gap-2 mt-8">
+                    {Array.from({ length: totalQuestions }, (_, index) => (
+                        <QuestionButton
+                            key={index}
+                            number={index + 1}
+                            isActive={index === currentQuestion}
+                            isFlagged={flaggedQuestions.has(index)}
+                            isAnswered={answeredQuestions.has(questions[index].id)}
+                            onClick={() => {
+                                onQuestionSelect(index)
+                            }}
+                        />
+                    ))}
+                </div>
+            </SheetContent>
+        </Sheet>
+    )
+}
+
+interface QuestionButtonProps {
+    number: number
+    isActive: boolean
+    isFlagged: boolean
+    isAnswered: boolean
+    onClick: () => void
+}
+
+function QuestionButton({
+    number,
+    isActive,
+    isFlagged,
+    isAnswered,
+    onClick,
+}: QuestionButtonProps) {
+    return (
+        <div className="relative group">
+            <Button
+                variant="outline"
+                onClick={onClick}
+                className={cn(
+                    isActive && "bg-primary text-primary-foreground",
+                    !isActive && isAnswered && "bg-foreground/10",
+                    !isActive && !isAnswered && "bg-muted"
+                )}
+            >
+                {number}
+            </Button>
+            {isFlagged && (
+                <Flag
+                    className={cn(
+                        "h-4 w-4 absolute -top-1 -right-2",
+                        isFlagged ? "fill-destructive stroke-destructive" : "stroke-muted-foreground"
+                    )}
+                />
+            )}
+        </div>
+    )
+}
+
 export function QuizProgress({ current, total }: { current: number; total: number }) {
     return (
         <div className="mb-4">
@@ -153,72 +269,6 @@ export function QuizProgress({ current, total }: { current: number; total: numbe
                     className="bg-primary h-2.5 rounded-full transition-all duration-300"
                     style={{ width: `${(current / total) * 100}%` }}
                 />
-            </div>
-        </div>
-    )
-}
-
-export function QuizResults({
-    questions,
-    answers
-}: {
-    questions: Array<{
-        id: string
-        questionText: string
-        options: Array<{
-            id: string
-            text: string
-            isCorrect: boolean
-        }>
-    }>
-    answers: Record<string, string>
-}) {
-    const calculateScore = () => {
-        let correct = 0
-        questions.forEach(question => {
-            const selectedOption = question.options.find(opt => opt.id === answers[question.id])
-            if (selectedOption?.isCorrect) correct++
-        })
-        return {
-            correct,
-            total: questions.length,
-            percentage: Math.round((correct / questions.length) * 100)
-        }
-    }
-
-    const score = calculateScore()
-
-    return (
-        <div className="w-full mx-auto max-w-2xl space-y-8">
-            <div className="text-center p-6 bg-muted rounded-lg">
-                <h2 className="text-2xl font-bold mb-2">Quiz Complete!</h2>
-                <p className="text-xl">
-                    You scored {score.correct} out of {score.total} ({score.percentage}%)
-                </p>
-            </div>
-
-            <div className="space-y-6">
-                {questions.map(question => {
-                    const selectedOption = question.options.find(opt => opt.id === answers[question.id])
-                    const correctOption = question.options.find(opt => opt.isCorrect)
-                    const isCorrect = selectedOption?.isCorrect
-
-                    return (
-                        <div
-                            key={question.id}
-                            className={`p-4 rounded-lg border ${isCorrect ? 'border-green-500 bg-green-50' : 'border-red-500 bg-red-50'
-                                }`}
-                        >
-                            <h3 className="font-medium mb-2">{question.questionText}</h3>
-                            <p>Your answer: {selectedOption?.text}</p>
-                            {!isCorrect && (
-                                <p className="text-green-700 mt-2">
-                                    Correct answer: {correctOption?.text}
-                                </p>
-                            )}
-                        </div>
-                    )
-                })}
             </div>
         </div>
     )

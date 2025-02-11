@@ -24,20 +24,24 @@ import { z } from 'zod'
 import { quizSchema } from '../schemas/quiz'
 import { create, update } from '../actions/quiz'
 import { actionToast } from '@/hooks/use-toast'
-import { useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 import { difficultyLevels } from '@/data/data'
+import { DataTable } from '@/features/questions/components/table/data-table'
+import { columns } from '@/features/questions/components/table/columns'
+import { QuestionType } from '@/features/questions/schemas/questions'
 
-export function QuizForm({ subjects, children, quiz }: {
+export function QuizForm({ subjects, quiz, questions }: {
     subjects: {
         id: string,
         name: string,
         code: string,
         examType: string,
-    }[]
-    children: React.ReactNode
+    }[],
+    questions: QuestionType[],
     quiz?: z.infer<typeof quizSchema> & { id: string }
 }) {
-    const router = useRouter()
+    "use no memo"
+
     const form = useForm<z.infer<typeof quizSchema>>({
         resolver: zodResolver(quizSchema),
         defaultValues: quiz ?? {
@@ -57,6 +61,12 @@ export function QuizForm({ subjects, children, quiz }: {
         const data = await action(values)
         actionToast({ actionData: data })
     }
+
+    // Filter questions based on selected subject
+    const selectedSubjectId = form.watch("subjectId")
+    const filteredQuestions = questions?.filter(q =>
+        !selectedSubjectId || q.subjectId === selectedSubjectId
+    ) ?? []
 
     return (
         <>
@@ -141,19 +151,50 @@ export function QuizForm({ subjects, children, quiz }: {
                     </div>
 
                     <Separator />
-                    <div>
-                        <TextInput
-                            label="Questions"
-                            name="questionIds"
-                            placeholder="Enter quiz questions"
-                            hidden
-                        />
-                        <QuizQuestionSheet>
-                            {children}
-                        </QuizQuestionSheet>
+                    <TextInput
+                        label="Questions"
+                        name="questionIds"
+                        placeholder="Enter quiz questions"
+                        hidden
+                    />
+
+                    <div className="p-4 border rounded-lg bg-card">
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-lg font-semibold">Select Questions</h2>
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm text-muted-foreground">
+                                    Selected: {form.watch("questionIds")?.length || 0}
+                                </span>
+                                <span className="text-sm text-muted-foreground">
+                                    Required: {form.watch("totalQuestions")}
+                                </span>
+                            </div>
+                        </div>
+
+                        {form.watch("subjectId") ? (
+                            <DataTable
+                                columns={columns}
+                                data={filteredQuestions}
+                                embedded
+                            />
+                        ) : (
+                            <div className="text-center py-8 text-muted-foreground">
+                                Please select a subject first to view available questions
+                            </div>
+                        )}
                     </div>
 
-
+                    {/* Validation Messages */}
+                    {form.watch("questionIds")?.length > form.watch("totalQuestions") && (
+                        <p className="text-destructive text-sm">
+                            You have selected more questions than the total required
+                        </p>
+                    )}
+                    {form.watch("questionIds")?.length < form.watch("totalQuestions") && (
+                        <p className="text-destructive text-sm">
+                            You need to select more questions to match the total required
+                        </p>
+                    )}
                     <div className="flex justify-end">
                         {quiz == null ? (
                             <Button type="submit" disabled={form.formState.isSubmitting} onClick={form.handleSubmit(onSubmit)}>
