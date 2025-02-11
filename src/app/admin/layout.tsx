@@ -13,7 +13,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <header className="container mx-auto flex sticky top-0 bg-background h-16 shrink-0 items-center gap-2 border-b px-4">
                 <div className="flex items-center gap-2 px-4">
                     <Link href="/admin">
-                        <Icons.LogoDark size={140} />
+                        <Icons.LogoDark width={140} height={140} />
                     </Link>
                 </div>
                 <div className="flex items-center gap-2 px-4">
